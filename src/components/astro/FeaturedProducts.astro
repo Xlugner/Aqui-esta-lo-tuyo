@@ -1,0 +1,72 @@
+---
+import { getFeaturedProducts } from "../../lib/supabase";
+import ProductCard from "./ProductCard.astro";
+const featuredProducts = await getFeaturedProducts();
+---
+
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <div class="text-center mb-12">
+    <h2 class="text-3xl font-bold text-neutral-800 mb-4">
+      Productos Destacados
+    </h2>
+    <p class="text-neutral-700">Los más populares de nuestra colección</p>
+  </div>
+  {
+    featuredProducts && featuredProducts.length > 0 ? (
+      <>
+        {/* Contenedor con scroll horizontal */}
+        <div class="overflow-x-auto scrollbar-hide pb-4">
+          <div class="flex gap-6 min-w-min px-2">
+            {featuredProducts.map((product: any) => (
+              <div class="flex-none w-[280px] sm:w-[300px]">
+                <ProductCard product={product} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Botón Ver Todos */}
+        <div class="flex justify-center mt-12">
+          <a
+            href="/productos"
+            class="px-6 py-2 text-sm sm:text-base font-medium text-neutral-700 border border-neutral-300 rounded-lg hover:border-neutral-500 hover:text-neutral-900 hover:bg-neutral-50 transition-all duration-200"
+          >
+            Ver todos los productos
+          </a>
+        </div>
+      </>
+    ) : (
+      <div class="text-center py-12">
+        <p class="text-neutral-500 text-lg">
+          No hay productos destacados disponibles.
+        </p>
+        <p class="text-neutral-400 mt-2">
+          Configura productos como "destacados" en el panel de administración.
+        </p>
+      </div>
+    )
+  }
+</section>
+
+<style>
+  /* Ocultar scrollbar pero mantener funcionalidad */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  /* Asegurar que las tarjetas tengan el mismo alto */
+  .flex-none {
+    display: flex;
+    flex-direction: column;
+  }
+  /* Pequeño espacio en los bordes para mejor visualización */
+  @media (min-width: 640px) {
+    .px-2 {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+</style>

@@ -1,0 +1,183 @@
+---
+import { MobileMenu } from "../react/MobileMenu";
+import { getStoreConfig, getSupabaseImage } from "../../lib/supabase";
+
+const storeConfig = await getStoreConfig();
+const storeName =
+  storeConfig?.store_name || import.meta.env.PUBLIC_STORE_NAME || "Mi Tienda";
+const logoUrl = getSupabaseImage(storeConfig?.logo_url);
+---
+
+<!-- Header  -->
+<header class="bg-neutral-900 text-white sticky top-0 z-50 shadow-md">
+  <nav class="max-w-7xl mx-auto px-4 py-3">
+    <div class="flex justify-between items-center">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-3">
+        {
+          logoUrl && logoUrl !== "/placeholder.jpg" && logoUrl.trim() ? (
+            <div class="w-12 h-12 rounded-full overflow-hidden bg-white flex items-center justify-center flex-shrink-0">
+              <img
+                src={logoUrl}
+                alt={storeName}
+                class="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          ) : (
+            <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+              <svg
+                class="w-8 h-8 text-primary-dark"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+              </svg>
+            </div>
+          )
+        }
+        <!-- Nombre solo en desktop -->
+        <span class="font-bold text-lg hidden sm:inline">
+          {storeName}
+        </span>
+      </a>
+
+      <!-- Navegación Desktop (centrada) -->
+      <nav class="hidden md:flex items-center space-x-8">
+        <a href="/" class="hover:opacity-80 font-medium transition-opacity">
+          Inicio
+        </a>
+        <a
+          href="/productos"
+          class="hover:opacity-80 font-medium transition-opacity"
+        >
+          Productos
+        </a>
+      </nav>
+
+      <!-- Iconos de la derecha -->
+      <div class="flex items-center gap-2">
+        <!-- Icono de Búsqueda -->
+        <button
+          id="searchButton"
+          class="hover:opacity-80 transition-opacity p-2 rounded-lg hover:bg-neutral-700"
+          aria-label="Buscar"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke-Linecap="round"
+            stroke-Linejoin="round"
+            stroke-Width="2"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </button>
+
+        <!-- Menú Hamburguesa (solo móvil) -->
+        <div class="md:hidden">
+          <MobileMenu client:load />
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- Barra de búsqueda desplegable (oculta por defecto) -->
+<div
+  id="searchBar"
+  class="bg-white shadow-md overflow-hidden transition-all duration-300 max-h-0"
+>
+  <div class="max-w-7xl mx-auto px-4 py-4">
+    <div class="relative">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Buscar productos..."
+        class="w-full pl-12 pr-12 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-neutral-700"
+      />
+      <svg
+        class="w-5 h-5 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2"
+        fill="none"
+        stroke-Linecap="round"
+        stroke-Linejoin="round"
+        stroke-Width="2"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+      <button
+        id="searchSubmitBtn"
+        class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-primary transition-colors"
+        aria-label="Buscar"
+      >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fill-rule="evenodd"
+            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+            clip-rule="evenodd"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle barra de búsqueda
+  const searchButton = document.getElementById("searchButton");
+  const searchBar = document.getElementById("searchBar");
+  const searchInput = document.getElementById(
+    "searchInput",
+  ) as HTMLInputElement;
+  const searchSubmitBtn = document.getElementById("searchSubmitBtn");
+
+  // Función para ejecutar búsqueda
+  const performSearch = () => {
+    const query = searchInput.value.trim();
+    if (query) {
+      window.location.href = `/productos?search=${encodeURIComponent(query)}`;
+    }
+  };
+
+  if (searchButton && searchBar && searchInput && searchSubmitBtn) {
+    // Toggle barra de búsqueda
+    searchButton.addEventListener("click", () => {
+      const isOpen =
+        searchBar.style.maxHeight && searchBar.style.maxHeight !== "0px";
+
+      if (isOpen) {
+        searchBar.style.maxHeight = "0px";
+      } else {
+        searchBar.style.maxHeight = "100px";
+        // Focus en el input después de un pequeño delay para que la animación se vea bien
+        setTimeout(() => searchInput.focus(), 300);
+      }
+    });
+
+    // Buscar al presionar Enter
+    searchInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        performSearch();
+      }
+    });
+
+    // Buscar al hacer clic en el botón
+    searchSubmitBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      performSearch();
+    });
+
+    // Cerrar al hacer clic fuera
+    document.addEventListener("click", (e) => {
+      if (
+        !(searchBar as HTMLElement).contains(e.target as Node) &&
+        !(searchButton as HTMLElement).contains(e.target as Node)
+      ) {
+        searchBar.style.maxHeight = "0px";
+      }
+    });
+  }
+</script>
