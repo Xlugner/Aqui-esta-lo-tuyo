@@ -140,6 +140,28 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 }
 
 /**
+ * Obtiene un producto por ID
+ */
+export async function getProductById(id: string): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from('products')
+    .select(`
+      *,
+      category:categories(id, name, slug),
+      images:product_images(*)
+    `)
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching product by id:', error);
+    return null;
+  }
+
+  return data;
+}
+
+/**
  * Crea un nuevo producto
  */
 export async function createProduct(product: {
