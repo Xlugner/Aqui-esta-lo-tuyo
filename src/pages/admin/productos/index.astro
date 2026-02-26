@@ -4,8 +4,8 @@ import { getSupabaseServer } from '../../../lib/admin-auth';
 import { getProducts, getCategories, deleteProduct } from '../../../lib/supabase';
 
 const supabase = getSupabaseServer(Astro.cookies);
-const products = await getProducts();
-const categories = await getCategories();
+const products = await getProducts(supabase);
+const categories = await getCategories(supabase);
 
 // Manejar eliminación
 if (Astro.request.method === 'POST') {

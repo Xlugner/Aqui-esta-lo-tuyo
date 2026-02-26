@@ -1,11 +1,11 @@
 ---
 import AdminLayout from '../../../components/admin/AdminLayout.astro';
 import { getSupabaseServer } from '../../../lib/admin-auth';
-import { getHeroSection, updateHeroSection } from '../../../lib/supabase';
+import { getHeroSection, updateHeroSection, uploadFile, getPublicUrl } from '../../../lib/supabase';
 import type { HeroImage } from '../../../lib/supabase';
 
 const supabase = getSupabaseServer(Astro.cookies);
-const heroSection = await getHeroSection();
+const heroSection = await getHeroSection(supabase);
 const existingImages = heroSection?.images || [];
 
 let successMessage: string | undefined;
@@ -13,31 +13,130 @@ let errorMessage: string | undefined;
 
 // Manejar actualización
 if (Astro.request.method === 'POST') {
+  console.log('=== DEBUG: Hero POST Request ===');
   const formData = await Astro.request.formData();
   const action = formData.get('action')?.toString();
+  console.log('Action:', action);
 
   if (action === 'update') {
     const imageUrls = formData.getAll('image_url') as string[];
     const altTexts = formData.getAll('alt_text') as string[];
-    const actives = formData.getAll('active') as string[];
+    const imageFiles = formData.getAll('image_file') as File[];
+    
+    console.log('=== DEBUG: Hero Images ===');
+    console.log('URLs:', imageUrls);
+    console.log('Alt texts:', altTexts);
+    console.log('Raw files from formData:', imageFiles);
+    console.log('Files type check:', imageFiles.map(f => typeof f));
+    console.log('Files constructor:', imageFiles.map(f => f?.constructor?.name));
+    console.log('Files details:', imageFiles.map(f => ({ 
+      name: f?.name, 
+      size: f?.size, 
+      type: f?.type,
+      isFile: f instanceof File 
+    })));
 
-    const images = imageUrls
-      .map((url, index) => ({
-        image_url: url.trim(),
-        alt_text: altTexts[index]?.trim() || '',
-        order_index: index,
-        active: true, // Por defecto activas
-      }))
-      .filter(img => img.image_url);
+    const images = [];
 
-    if (images.length > 0) {
-      const result = await updateHeroSection(images);
-      if (result.length > 0) {
-        successMessage = 'Imágenes actualizadas correctamente';
-      } else {
-        errorMessage = 'Error al actualizar las imágenes';
+    // Procesar URLs existentes
+    for (let i = 0; i < imageUrls.length; i++) {
+      const url = imageUrls[i]?.trim();
+      if (url) {
+        console.log(`Procesando URL ${i}:`, url);
+        images.push({
+          image_url: url,
+          alt_text: altTexts[i]?.trim() || '',
+          order_index: i,
+          active: true
+        });
       }
     }
+
+    // Procesar archivos subidos
+    console.log('Cantidad de archivos:', imageFiles.length);
+    
+    for (let i = 0; i < imageFiles.length; i++) {
+      const file = imageFiles[i];
+      console.log(`Archivo ${i}:`, {
+        name: file?.name,
+        size: file?.size,
+        type: file?.type,
+        isFile: file instanceof File
+      });
+      
+      // Verificar si es un archivo válido
+      if (file && file instanceof File && file.size > 0) {
+        console.log('✅ Archivo válido, procesando:', file.name);
+        const fileName = `${Date.now()}-${file.name}`;
+        const path = `hero/${fileName}`;
+        
+        console.log('Intentando uploadFile con bucket: store, path:', path);
+        const uploadedPath = await uploadFile('store', path, file, supabase);
+        console.log('Resultado uploadFile (hero):', uploadedPath);
+        
+        if (uploadedPath) {
+          const publicUrl = getPublicUrl('store', uploadedPath, supabase);
+          console.log('URL pública (hero):', publicUrl);
+          images.push({
+            image_url: publicUrl,
+            alt_text: altTexts[i]?.trim() || '',
+            order_index: imageUrls.length + i,
+            active: true
+          });
+        } else {
+          console.error('❌ Error: uploadFile retornó null');
+        }
+      } else {
+        console.log(`❌ Archivo ${i} inválido o vacío:`, {
+          exists: !!file,
+          isFile: file instanceof File,
+          size: file?.size,
+          name: file?.name
+        });
+      }
+    }
+
+    console.log('Imágenes finales para guardar:', images);
+    console.log('Cantidad de imágenes:', images.length);
+
+    if (images.length > 0) {
+      console.log('Llamando a updateHeroSection...');
+      const result = await updateHeroSection(images, supabase);
+      console.log('Resultado updateHeroSection:', result);
+      if (result.length > 0) {
+        successMessage = 'Imágenes actualizadas correctamente';
+        console.log('SUCCESS: Imágenes guardadas');
+      } else {
+        errorMessage = 'Error al actualizar las imágenes';
+        console.error('ERROR: updateHeroSection retornó array vacío');
+      }
+    } else {
+      errorMessage = 'No se proporcionaron imágenes válidas';
+      console.error('ERROR: No hay imágenes para guardar');
+    }
+  } else if (action === 'delete') {
+    const imageId = formData.get('image_id')?.toString();
+    console.log('=== DEBUG: Delete Hero Image ===');
+    console.log('Image ID to delete:', imageId);
+    
+    if (imageId) {
+      const { error } = await supabase
+        .from('hero_images')
+        .delete()
+        .eq('id', imageId);
+      
+      if (error) {
+        console.error('Error deleting hero image:', error);
+        errorMessage = 'Error al eliminar la imagen';
+      } else {
+        console.log('Hero image deleted successfully');
+        successMessage = 'Imagen eliminada correctamente';
+      }
+    } else {
+      errorMessage = 'No se proporcionó ID de imagen';
+    }
+  } else {
+    console.error('ERROR: Action desconocido:', action);
   }
 }
 ---
@@ -62,7 +161,7 @@ if (Astro.request.method === 'POST') {
       Gestiona las imágenes que aparecen en el carrusel de la página principal.
     </p>
 
-    <form method="POST" id="hero-form" class="space-y-6">
+    <form method="POST" id="hero-form" class="space-y-6" enctype="multipart/form-data">
       <input type="hidden" name="action" value="update" />
       
       <div id="images-container" class="space-y-4">
@@ -96,7 +195,7 @@ if (Astro.request.method === 'POST') {
               </div>
               <button
                 type="button"
-                onclick="removeImage(this)"
+                onclick={`deleteImage('${img.id}')`}
                 class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,16 +207,36 @@ if (Astro.request.method === 'POST') {
         ))}
       </div>
 
-      <button
-        type="button"
-        onclick="addImage()"
-        class="flex items-center gap-2 text-neutral-600 hover:text-neutral-900"
-      >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-        </svg>
-        Agregar imagen
-      </button>
+      <div class="border-t border-neutral-200 pt-6">
+        <h3 class="text-lg font-medium text-neutral-800 mb-4">Agregar nuevas imágenes</h3>
+        <div class="space-y-4">
+          <div class="border border-neutral-200 rounded-lg p-4">
+            <h4 class="text-sm font-medium text-neutral-700 mb-3">Opción 1: Subir archivos desde tu dispositivo</h4>
+            <input
+              type="file"
+              name="image_file"
+              multiple
+              accept="image/*"
+              class="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+            />
+            <p class="text-xs text-neutral-500 mt-2">Puedes seleccionar múltiples imágenes a la vez</p>
+          </div>
+          
+          <div class="border border-neutral-200 rounded-lg p-4">
+            <h4 class="text-sm font-medium text-neutral-700 mb-3">Opción 2: Agregar URLs manualmente</h4>
+            <button
+              type="button"
+              onclick="addImage()"
+              class="flex items-center gap-2 text-neutral-600 hover:text-neutral-900"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Agregar imagen por URL
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div class="flex gap-4 pt-6 border-t border-neutral-200">
         <button
@@ -132,6 +251,34 @@ if (Astro.request.method === 'POST') {
 </AdminLayout>
 
 <script>
+  function deleteImage(imageId: string) {
+    if (confirm('¿Estás seguro de que quieres eliminar esta imagen?')) {
+      // Crear un formulario temporal para enviar la acción de eliminación
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.style.display = 'none';
+      
+      // Agregar action
+      const actionInput = document.createElement('input');
+      actionInput.type = 'hidden';
+      actionInput.name = 'action';
+      actionInput.value = 'delete';
+      form.appendChild(actionInput);
+      
+      // Agregar image_id
+      const idInput = document.createElement('input');
+      idInput.type = 'hidden';
+      idInput.name = 'image_id';
+      idInput.value = imageId;
+      form.appendChild(idInput);
+      
+      // Agregar al body y enviar
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+    }
+  }
+
   function addImage() {
     const container = document.getElementById('images-container');
     const index = container?.children.length || 0;
@@ -167,7 +314,7 @@ if (Astro.request.method === 'POST') {
         </div>
         <button
           type="button"
-          onclick="removeImage(this)"
+          onclick="this.closest('.image-item').remove()"
           class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,11 +327,6 @@ if (Astro.request.method === 'POST') {
     container?.appendChild(div);
   }
 
-  function removeImage(button: HTMLElement) {
-    const item = button.closest('.image-item');
-    item?.remove();
-  }
-
+  (window as any).deleteImage = deleteImage;
   (window as any).addImage = addImage;
-  (window as any).removeImage = removeImage;
 </script>

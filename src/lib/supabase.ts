@@ -77,8 +77,9 @@ export interface HeroSection {
 /**
  * Obtiene todos los productos con sus imágenes y categorías
  */
-export async function getProducts(): Promise<Product[]> {
-  const { data, error } = await supabase
+export async function getProducts(supabaseClient?: any): Promise<Product[]> {
+  const client = supabaseClient || supabase;
+  const { data, error } = await client
     .from('products')
     .select(`
       *,
@@ -236,29 +237,35 @@ export async function deleteProduct(id: string): Promise<boolean> {
 /**
  * Agrega imágenes a un producto
  */
-export async function addProductImages(productId: string, images: Array<{
-  image_url: string;
-  alt_text?: string;
-  order_index?: number;
-}>): Promise<ProductImage[]> {
-  const imagesWithProduct = images.map((img, index) => ({
-    product_id: productId,
-    image_url: img.image_url,
-    alt_text: img.alt_text,
-    order_index: img.order_index || index
-  }));
-
-  const { data, error } = await supabase
+export async function addProductImages(
+  productId: string,
+  images: { image_url: string; alt_text?: string; order_index?: number }[],
+  supabaseClient?: any
+): Promise<boolean> {
+  const client = supabaseClient || supabase;
+  console.log('=== DEBUG: addProductImages ===');
+  console.log('Product ID:', productId);
+  console.log('Images to insert:', images);
+  
+  const { data, error } = await client
     .from('product_images')
-    .insert(imagesWithProduct)
-    .select();
+    .insert(
+      images.map(img => ({
+        product_id: productId,
+        image_url: img.image_url,
+        alt_text: img.alt_text || '',
+        order_index: img.order_index || 0
+      }))
+    );
+
+  console.log('Resultado insert:', { data, error });
 
   if (error) {
     console.error('Error adding product images:', error);
-    return [];
+    return false;
   }
 
-  return data || [];
+  return true;
 }
 
 /**
@@ -283,8 +290,9 @@ export async function deleteProductImages(productId: string): Promise<boolean> {
 /**
  * Obtiene todas las categorías
  */
-export async function getCategories(): Promise<Category[]> {
-  const { data, error } = await supabase
+export async function getCategories(supabaseClient?: any): Promise<Category[]> {
+  const client = supabaseClient || supabase;
+  const { data, error } = await client
     .from('categories')
     .select('*')
     .order('name');
@@ -318,8 +326,9 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
 /**
  * Obtiene productos por categoría
  */
-export async function getProductsByCategory(categorySlug: string): Promise<Product[]> {
-  const { data, error } = await supabase
+export async function getProductsByCategory(categorySlug: string, supabaseClient?: any): Promise<Product[]> {
+  const client = supabaseClient || supabase;
+  const { data, error } = await client
     .from('products')
     .select(`
       *,
@@ -441,8 +450,9 @@ export async function updateStoreConfig(config: Partial<StoreConfig>): Promise<S
 /**
  * Obtiene el contenido de la Hero Section
  */
-export async function getHeroSection(): Promise<HeroSection | null> {
-  const { data, error } = await supabase
+export async function getHeroSection(supabaseClient?: any): Promise<HeroSection | null> {
+  const client = supabaseClient || supabase;
+  const { data, error } = await client
     .from('hero_images')
     .select('*')
     .eq('active', true)
@@ -459,32 +469,60 @@ export async function getHeroSection(): Promise<HeroSection | null> {
 /**
  * Actualiza las imágenes del hero section
  */
-export async function updateHeroSection(images: Array<{
-  image_url: string;
-  alt_text?: string;
-  order_index?: number;
-  active?: boolean;
-}>): Promise<HeroImage[]> {
-  // Primero eliminar todas las imágenes existentes
-  await supabase.from('hero_images').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+export async function updateHeroSection(
+  images: Array<{
+    image_url: string;
+    alt_text?: string;
+    order_index?: number;
+    active?: boolean;
+  }>,
+  supabaseClient?: any
+): Promise<HeroImage[]> {
+  const client = supabaseClient || supabase;
+  
+  console.log('=== DEBUG: updateHeroSection ===');
+  console.log('Images to save:', images);
+  console.log('Client type:', supabaseClient ? 'authenticated' : 'default');
+  
+  try {
+    // Primero eliminar todas las imágenes existentes
+    console.log('Eliminando imágenes existentes...');
+    const { error: deleteError } = await client
+      .from('hero_images')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    
+    if (deleteError) {
+      console.error('Error deleting existing images:', deleteError);
+    } else {
+      console.log('Imágenes existentes eliminadas');
+    }
 
-  // Insertar las nuevas imágenes
-  const { data, error } = await supabase
-    .from('hero_images')
-    .insert(images.map(img => ({
-      image_url: img.image_url,
-      alt_text: img.alt_text,
-      order_index: img.order_index || 0,
-      active: img.active !== false
-    })))
-    .select();
+    // Insertar las nuevas imágenes
+    console.log('Insertando nuevas imágenes...');
+    const { data, error } = await client
+      .from('hero_images')
+      .insert(images.map(img => ({
+        image_url: img.image_url,
+        alt_text: img.alt_text,
+        order_index: img.order_index || 0,
+        active: img.active !== false
+      })))
+      .select();
 
-  if (error) {
-    console.error('Error updating hero section:', error);
+    console.log('Insert result:', { data, error });
+
+    if (error) {
+      console.error('Error updating hero section:', error);
+      return [];
+    }
+
+    console.log('Hero section updated successfully, images count:', data?.length);
+    return data || [];
+  } catch (err) {
+    console.error('Unexpected error in updateHeroSection:', err);
     return [];
   }
-
-  return data || [];
 }
 
 // ============= UTILIDADES =============
@@ -506,14 +544,23 @@ export function getSupabaseImage(url: string | null | undefined): string {
 export async function uploadFile(
   bucket: string,
   path: string,
-  file: File
+  file: File,
+  supabaseClient?: any
 ): Promise<string | null> {
-  const { data, error } = await supabase.storage
+  const client = supabaseClient || supabase;
+  console.log('=== DEBUG: uploadFile ===');
+  console.log('Bucket:', bucket);
+  console.log('Path:', path);
+  console.log('File:', { name: file.name, size: file.size, type: file.type });
+  
+  const { data, error } = await client.storage
     .from(bucket)
     .upload(path, file, {
       cacheControl: '3600',
       upsert: true
     });
+
+  console.log('Resultado upload:', { data, error });
 
   if (error) {
     console.error('Error uploading file:', error);
@@ -521,6 +568,18 @@ export async function uploadFile(
   }
 
   return data.path;
+}
+
+/**
+ * Obtiene la URL pública de un archivo en Supabase Storage
+ */
+export function getPublicUrl(bucket: string, path: string, supabaseClient?: any): string {
+  const client = supabaseClient || supabase;
+  const { data } = client.storage
+    .from(bucket)
+    .getPublicUrl(path);
+
+  return data.publicUrl;
 }
 
 /**

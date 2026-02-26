@@ -42,8 +42,12 @@ export interface AdminUser {
 // Verificar si el usuario actual es admin
 export async function checkIsAdmin(supabase: ReturnType<typeof getSupabaseServer>): Promise<boolean> {
   const { data: { user } } = await supabase.auth.getUser();
+  console.log('🔍 Current user:', user);
   
-  if (!user) return false;
+  if (!user) {
+    console.log('❌ No user found');
+    return false;
+  }
 
   const { data: adminUser } = await supabase
     .from('admin_users')
@@ -51,21 +55,27 @@ export async function checkIsAdmin(supabase: ReturnType<typeof getSupabaseServer
     .eq('id', user.id)
     .single();
 
+  console.log('👤 Admin user found:', adminUser);
   return !!adminUser;
 }
 
 // Obtener el usuario admin actual
 export async function getCurrentAdmin(supabase: ReturnType<typeof getSupabaseServer>): Promise<AdminUser | null> {
   const { data: { user } } = await supabase.auth.getUser();
+  console.log('🔍 Getting current admin, user:', user);
   
-  if (!user) return null;
+  if (!user) {
+    console.log('❌ No user found in getCurrentAdmin');
+    return null;
+  }
 
   const { data: adminUser } = await supabase
     .from('admin_users')
-    .select('*')
+    .select('id, email, full_name')
     .eq('id', user.id)
     .single();
 
+  console.log('👤 Admin user data:', adminUser);
   return adminUser;
 }
 
