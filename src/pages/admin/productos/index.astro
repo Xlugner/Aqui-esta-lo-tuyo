@@ -1,5 +1,6 @@
 ---
 import AdminLayout from '../../../components/admin/AdminLayout.astro';
+import NotificationScript from '../../../components/admin/NotificationScript.astro';
 import { getSupabaseServer } from '../../../lib/admin-auth';
 import { getProducts, getCategories, deleteProduct } from '../../../lib/supabase';
 
@@ -113,7 +114,7 @@ if (Astro.request.method === 'POST') {
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                   </a>
-                  <form method="POST" class="inline">
+                  <form method="POST" class="inline" data-notifications="true">
                     <input type="hidden" name="action" value="delete" />
                     <input type="hidden" name="productId" value={product.id} />
                     <button
@@ -136,3 +137,5 @@ if (Astro.request.method === 'POST') {
     </div>
   )}
 </AdminLayout>
+
+<NotificationScript />

@@ -1,5 +1,6 @@
 ---
 import AdminLayout from '../../../../components/admin/AdminLayout.astro';
+import NotificationScript from '../../../../components/admin/NotificationScript.astro';
 import { getSupabaseServer } from '../../../../lib/admin-auth';
 import { updateCategory } from '../../../../lib/supabase';
 
@@ -73,7 +74,7 @@ if (Astro.request.method === 'POST') {
       </div>
     )}
 
-    <form method="POST" class="bg-white rounded-lg shadow p-6 space-y-6">
+    <form method="POST" data-notifications="true" class="bg-white rounded-lg shadow p-6 space-y-6">
       <!-- Nombre -->
       <div>
         <label for="name" class="block text-sm font-medium text-neutral-700 mb-2">
@@ -131,3 +132,5 @@ if (Astro.request.method === 'POST') {
     </form>
   </div>
 </AdminLayout>
+
+<NotificationScript />

@@ -1,5 +1,6 @@
 ---
 import AdminLayout from '../../../components/admin/AdminLayout.astro';
+import NotificationScript from '../../../components/admin/NotificationScript.astro';
 import { getSupabaseServer } from '../../../lib/admin-auth';
 import { getHeroSection, updateHeroSection, uploadFile, getPublicUrl } from '../../../lib/supabase';
 import type { HeroImage } from '../../../lib/supabase';
@@ -161,7 +162,7 @@ if (Astro.request.method === 'POST') {
       Gestiona las imágenes que aparecen en el carrusel de la página principal.
     </p>
 
-    <form method="POST" id="hero-form" class="space-y-6" enctype="multipart/form-data">
+    <form method="POST" id="hero-form" class="space-y-6" enctype="multipart/form-data" data-notifications="true">
       <input type="hidden" name="action" value="update" />
       
       <div id="images-container" class="space-y-4">
@@ -330,3 +331,5 @@ if (Astro.request.method === 'POST') {
   (window as any).deleteImage = deleteImage;
   (window as any).addImage = addImage;
 </script>
+
+<NotificationScript />
