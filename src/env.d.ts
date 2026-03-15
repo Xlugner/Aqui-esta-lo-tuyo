@@ -9,6 +9,8 @@ interface ImportMetaEnv {
   readonly PUBLIC_STORE_PHONE: string;
   readonly PUBLIC_STORE_LOCATION: string;
   readonly PUBLIC_WHATSAPP_NUMBER: string;
+  readonly ADMIN_EMAIL: string;
+  readonly ADMIN_PASSWORD: string;
 }
 
 interface ImportMeta {

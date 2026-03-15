@@ -9,7 +9,16 @@ interface Props {
 
 const { product } = Astro.props;
 const { name, price, currency, slug, description, images } = product;
-const imageUrl = getSupabaseImage(images?.[0]?.image_url);
+
+// Obtener la primera imagen de la relación product_images
+const firstImage = images && images.length > 0 ? images[0] : null;
+const imageUrl = getSupabaseImage(firstImage?.image_url);
+
+console.log('=== DEBUG ProductCard ===');
+console.log('Product:', name);
+console.log('Images array:', images);
+console.log('First image:', firstImage);
+console.log('Image URL:', imageUrl);
 
 // Preparar datos para el botón de añadir al carrito
 const cartItem = {

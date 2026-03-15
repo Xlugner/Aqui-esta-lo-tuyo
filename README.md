@@ -1,6 +1,6 @@
-# Ecommerce Frontend con Astro + React
+# Ecommerce Frontend con Astro + React + Supabase
 
-Frontend moderno para la tienda online, construido con Astro, React y Tailwind CSS.
+Frontend moderno para la tienda online, construido con Astro, React, Tailwind CSS y Supabase.
 
 ## 🎨 Características
 
@@ -10,15 +10,15 @@ Frontend moderno para la tienda online, construido con Astro, React y Tailwind C
 - 🛒 Carrito de compras funcional
 - 📱 Diseño totalmente responsive
 - ⚡ Optimizado para rendimiento
-- 🔄 Integración con Strapi CMS
+- 🔐 Autenticación con Supabase
+- 🗄️ Base de datos PostgreSQL con Supabase
 - 🔍 SEO optimizado
-- 🎨 Modo oscuro/claro
 
 ## 🛠️ Requisitos
 
 - Node.js >= 18.0.0
 - npm >= 8.0.0
-- Backend Strapi en ejecución (ver [repositorio del backend](https://github.com/Xlugner/Ecommerce-Strapi-backend))
+- Proyecto Supabase configurado
 
 ## 🚀 Instalación
 
@@ -73,12 +73,16 @@ src/
 Crea un archivo `.env` en la raíz del proyecto:
 
 ```env
-# URL de la API de Strapi
-PUBLIC_STRAPI_URL=http://localhost:1337
+# Configuración de Supabase
+PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
 
-# Configuraciones opcionales
+# Configuraciones de la tienda
 SITE_NAME="Mi Tienda Online"
 DEFAULT_LANGUAGE=es
+PUBLIC_STORE_EMAIL=contacto@mitienda.com
+PUBLIC_STORE_PHONE=34123456789
+PUBLIC_WHATSAPP_NUMBER=34123456789
 ```
 
 ## 🚀 Comandos útiles
@@ -97,7 +101,7 @@ DEFAULT_LANGUAGE=es
 - [React](https://reactjs.org/) - Biblioteca para interfaces de usuario
 - [Tailwind CSS](https://tailwindcss.com/) - Framework CSS utilitario
 - [TypeScript](https://www.typescriptlang.org/) - JavaScript tipado
-- [Strapi](https://strapi.io/) - Headless CMS (backend)
+- [Supabase](https://supabase.com/) - Backend as a Service con PostgreSQL
 
 ## 🌐 Despliegue
 

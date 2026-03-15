@@ -1,7 +1,7 @@
 ---
 import AdminLayout from '../../../components/admin/AdminLayout.astro';
 import { getSupabaseServer } from '../../../lib/admin-auth';
-import { createProduct, getCategories, addProductImages, uploadFile, getPublicUrl } from '../../../lib/supabase';
+import { createProduct, getCategories, addProductImages, uploadFile } from '../../../lib/supabase';
 
 const supabase = getSupabaseServer(Astro.cookies);
 const categories = await getCategories(supabase);
@@ -28,12 +28,15 @@ if (Astro.request.method === 'POST') {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 
-  // Manejar subida de imágenes
+  // Manejar imágenes
   const imageFiles = formData.getAll('image_file') as File[];
   const imageUrls = formData.getAll('image_url') as string[];
 
   console.log('=== DEBUG: Creando producto ===');
   console.log('Datos del producto:', { name, description, price, currency, category_id, featured });
+  console.log('Archivos recibidos:', imageFiles.length);
+  console.log('Archivos detalles:', imageFiles.map(f => ({ name: f.name, size: f.size, type: f.type })));
+  console.log('URLs recibidas:', imageUrls);
 
   const product = await createProduct({
     name,
@@ -43,67 +46,74 @@ if (Astro.request.method === 'POST') {
     slug,
     featured,
     category_id,
-  });
+  }, supabase);
 
   console.log('Producto creado:', product);
 
   if (product) {
-    // Subir imágenes si hay archivos
-    if (imageFiles.length > 0) {
-      console.log('=== DEBUG: Subiendo archivos ===');
-      console.log('Archivos recibidos:', imageFiles.map(f => ({ name: f.name, size: f.size, type: f.type })));
+    const imagesToAdd = [];
+
+    // Procesar archivos subidos - filtrar archivos válidos
+    const validFiles = imageFiles.filter(f => f && f.size > 0);
+    console.log('Archivos válidos:', validFiles.length);
+    
+    for (let i = 0; i < validFiles.length; i++) {
+      const file = validFiles[i];
+      console.log(`Procesando archivo ${i}:`, file.name);
+      const fileName = `${Date.now()}-${i}-${file.name}`;
+      const path = `products/${product.id}/${fileName}`;
       
-      const uploadedImages = [];
+      console.log('Subiendo a:', path);
+      const uploadedPath = await uploadFile('products', path, file, supabase);
+      console.log('Resultado uploadFile:', uploadedPath);
       
-      for (let i = 0; i < imageFiles.length; i++) {
-        const file = imageFiles[i];
-        if (file && file.size > 0) {
-          console.log(`Procesando archivo ${i}:`, file.name);
-          const fileName = `${Date.now()}-${file.name}`;
-          const path = `products/${product.id}/${fileName}`;
-          
-          console.log('Subiendo a:', path);
-          const uploadedPath = await uploadFile('products', path, file, supabase);
-          console.log('Resultado uploadFile:', uploadedPath);
-          
-          if (uploadedPath) {
-            const publicUrl = getPublicUrl('products', uploadedPath, supabase);
-            console.log('URL pública:', publicUrl);
-            uploadedImages.push({
-              image_url: publicUrl,
-              alt_text: '',
-              order_index: i
-            });
-          }
-        }
-      }
-      
-      console.log('Imágenes subidas:', uploadedImages);
-      
-      if (uploadedImages.length > 0) {
-        console.log('Agregando imágenes a product_images...');
-        const result = await addProductImages(product.id, uploadedImages, supabase);
-        console.log('Resultado addProductImages:', result);
+      if (uploadedPath) {
+        // Construir la URL pública directamente
+        const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+        const publicUrl = `${supabaseUrl}/storage/v1/object/public/products/${uploadedPath}`;
+        console.log('URL pública construida:', publicUrl);
+        imagesToAdd.push({
+          image_url: publicUrl,
+          alt_text: '',
+          order_index: imagesToAdd.length
+        });
+      } else {
+        console.error(`Error al subir archivo ${i}`);
       }
     }
-    
-    // Agregar URLs si hay
-    const validUrls = imageUrls.filter(url => url.trim());
-    console.log('=== DEBUG: Procesando URLs ===');
-    console.log('URLs válidas:', validUrls);
-    
-    if (validUrls.length > 0) {
-      const urlImages = validUrls.map((url, i) => ({
-        image_url: url.trim(),
-        alt_text: '',
-        order_index: i
-      }));
-      console.log('Imágenes desde URLs:', urlImages);
-      const result = await addProductImages(product.id, urlImages, supabase);
-      console.log('Resultado addProductImages (URLs):', result);
+
+    // Procesar URLs directas
+    for (let i = 0; i < imageUrls.length; i++) {
+      const url = imageUrls[i]?.trim();
+      if (url) {
+        console.log(`Procesando URL ${i}:`, url);
+        imagesToAdd.push({
+          image_url: url,
+          alt_text: '',
+          order_index: imagesToAdd.length
+        });
+      }
     }
-    
-    successMessage = 'Producto creado correctamente';
+
+    // Guardar imágenes en product_images
+    if (imagesToAdd.length > 0) {
+      console.log('Guardando imágenes:', imagesToAdd);
+      const result = await addProductImages(product.id, imagesToAdd, supabase);
+      console.log('Resultado addProductImages:', result);
+      
+      if (result) {
+        successMessage = 'Producto creado correctamente con imágenes';
+        // Redirigir después de 1 segundo
+        setTimeout(() => {
+          // La redirección se hará con un meta refresh en el HTML
+        }, 1000);
+      } else {
+        errorMessage = 'Producto creado pero hubo error al guardar las imágenes';
+      }
+    } else {
+      successMessage = 'Producto creado correctamente (sin imágenes)';
+      console.log('No hay imágenes para guardar');
+    }
   } else {
     errorMessage = 'Error al crear el producto';
   }
@@ -130,7 +140,7 @@ if (Astro.request.method === 'POST') {
       </div>
     )}
 
-    <form method="POST" class="bg-white rounded-lg shadow p-6 space-y-6">
+    <form method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6 space-y-6">
       <!-- Nombre -->
       <div>
         <label for="name" class="block text-sm font-medium text-neutral-700 mb-2">
@@ -288,18 +298,7 @@ if (Astro.request.method === 'POST') {
     input.placeholder = 'https://ejemplo.com/imagen.jpg';
     container?.appendChild(input);
   }
-
-  function addFileInput() {
-    const container = document.getElementById('image-urls');
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.name = 'image_file';
-    fileInput.multiple = true;
-    fileInput.accept = 'image/*';
-    fileInput.className = 'w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent';
-    container?.appendChild(fileInput);
-  }
-  // Expose to global scope
   (window as any).addImageUrl = addImageUrl;
-  (window as any).addFileInput = addFileInput;
 </script>
+
+

@@ -14,7 +14,9 @@ if (Astro.request.method === 'POST') {
   const productId = formData.get('productId')?.toString();
 
   if (action === 'delete' && productId) {
-    await deleteProduct(productId);
+    console.log('Eliminando producto:', productId);
+    const result = await deleteProduct(productId, supabase);
+    console.log('Resultado eliminación:', result);
     return Astro.redirect('/admin/productos');
   }
 }

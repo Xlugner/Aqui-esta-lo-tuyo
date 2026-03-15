@@ -8,4 +8,5 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - PUBLIC_STRAPI_URL=https://fresh-actor-bfeb6836b9.strapiapp.com
+      - PUBLIC_SUPABASE_URL=${PUBLIC_SUPABASE_URL}
+      - PUBLIC_SUPABASE_ANON_KEY=${PUBLIC_SUPABASE_ANON_KEY}

@@ -1,8 +1,7 @@
 ---
 import AdminLayout from '../../../../components/admin/AdminLayout.astro';
 import { getSupabaseServer } from '../../../../lib/admin-auth';
-import { getProductById, updateProduct, getCategories, deleteProductImages, addProductImages } from '../../../../lib/supabase';
-import type { ProductImage } from '../../../../lib/supabase';
+import { getProductById, updateProduct, getCategories, deleteProductImages, addProductImages, uploadFile } from '../../../../lib/supabase';
 
 const { id } = Astro.params;
 
@@ -47,19 +46,53 @@ if (Astro.request.method === 'POST') {
     slug,
     featured,
     category_id: category_id || undefined,
-  });
+  }, supabase);
 
   if (updated) {
     // Actualizar imágenes
+    const imageFiles = formData.getAll('image_file') as File[];
     const imageUrls = formData.getAll('image_url') as string[];
-    const validUrls = imageUrls.filter(url => url.trim());
     
-    await deleteProductImages(id);
-    if (validUrls.length > 0) {
-      await addProductImages(id, validUrls.map((url, i) => ({
-        image_url: url.trim(),
-        order_index: i,
-      })));
+    const imagesToAdd = [];
+
+    // Procesar archivos subidos - filtrar archivos válidos
+    const validFiles = imageFiles.filter(f => f && f.size > 0);
+    
+    for (let i = 0; i < validFiles.length; i++) {
+      const file = validFiles[i];
+      console.log(`Procesando archivo ${i}:`, file.name);
+      const fileName = `${Date.now()}-${i}-${file.name}`;
+      const path = `products/${id}/${fileName}`;
+      
+      const uploadedPath = await uploadFile('products', path, file, supabase);
+      if (uploadedPath) {
+        // Construir la URL pública directamente
+        const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+        const publicUrl = `${supabaseUrl}/storage/v1/object/public/products/${uploadedPath}`;
+        imagesToAdd.push({
+          image_url: publicUrl,
+          alt_text: '',
+          order_index: imagesToAdd.length
+        });
+      }
+    }
+
+    // Procesar URLs directas
+    for (let i = 0; i < imageUrls.length; i++) {
+      const url = imageUrls[i]?.trim();
+      if (url) {
+        imagesToAdd.push({
+          image_url: url,
+          alt_text: '',
+          order_index: imagesToAdd.length
+        });
+      }
+    }
+
+    // Eliminar imágenes antiguas y agregar nuevas
+    await deleteProductImages(id, supabase);
+    if (imagesToAdd.length > 0) {
+      await addProductImages(id, imagesToAdd, supabase);
     }
     
     return Astro.redirect('/admin/productos');
@@ -89,7 +122,7 @@ if (Astro.request.method === 'POST') {
       </div>
     )}
 
-    <form method="POST" class="bg-white rounded-lg shadow p-6 space-y-6">
+    <form method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6 space-y-6">
       <!-- Nombre -->
       <div>
         <label for="name" class="block text-sm font-medium text-neutral-700 mb-2">
@@ -187,33 +220,53 @@ if (Astro.request.method === 'POST') {
       <!-- Imágenes -->
       <div>
         <label class="block text-sm font-medium text-neutral-700 mb-2">
-          URLs de imágenes
+          Imágenes
         </label>
-        <div id="image-urls" class="space-y-2">
-          {product.images?.map((img: ProductImage) => (
-            <input
-              type="url"
-              name="image_url"
-              value={img.image_url}
-              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-            />
-          ))}
-          {(!product.images || product.images.length === 0) && (
+        {product.images && product.images.length > 0 && (
+          <div class="mb-4">
+            <p class="text-sm text-neutral-600 mb-2">Imágenes actuales:</p>
+            <div class="grid grid-cols-2 gap-2">
+              {product.images.map((img) => (
+                <div class="relative">
+                  <img 
+                    src={img.image_url} 
+                    alt={img.alt_text || 'Producto'}
+                    class="w-full h-24 object-cover rounded-lg border border-neutral-200"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <div class="space-y-4">
+          <div id="image-urls" class="space-y-2">
             <input
               type="url"
               name="image_url"
               class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
               placeholder="https://ejemplo.com/imagen.jpg"
             />
-          )}
+          </div>
+          <button
+            type="button"
+            onclick="addImageUrl()"
+            class="text-sm text-neutral-600 hover:text-neutral-900"
+          >
+            + Agregar URL
+          </button>
+          <div class="border-t border-neutral-200 pt-4">
+            <label class="block text-sm font-medium text-neutral-700 mb-2">
+              o subir nuevos archivos
+            </label>
+            <input
+              type="file"
+              name="image_file"
+              multiple
+              accept="image/*"
+              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+            />
+          </div>
         </div>
-        <button
-          type="button"
-          onclick="addImageUrl()"
-          class="mt-2 text-sm text-neutral-600 hover:text-neutral-900"
-        >
-          + Agregar otra imagen
-        </button>
       </div>
 
       <!-- Submit -->
@@ -247,3 +300,5 @@ if (Astro.request.method === 'POST') {
   }
   (window as any).addImageUrl = addImageUrl;
 </script>
+
+

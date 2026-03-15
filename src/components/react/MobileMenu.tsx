@@ -64,7 +64,7 @@ export const MobileMenu = () => {
       >
         {/* Hero Banner dentro del menú */}
         <div className="relative bg-hero-gradient h-64 overflow-hidden">
-          {/* Imagen del Hero Section de Strapi */}
+          {/* Imagen del Hero Section de Supabase */}
           {heroSection?.images?.[0] && (
             <img
               src={getSupabaseImage(heroSection.images[0].image_url)}

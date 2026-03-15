@@ -17,8 +17,8 @@ export interface ProductImage {
   product_id: string;
   image_url: string;
   alt_text?: string;
-  order_index: number;
-  created_at: string;
+  order_index?: number;
+  created_at?: string;
 }
 
 export interface Product {
@@ -79,65 +79,119 @@ export interface HeroSection {
  */
 export async function getProducts(supabaseClient?: any): Promise<Product[]> {
   const client = supabaseClient || supabase;
-  const { data, error } = await client
+  console.log('=== DEBUG: getProducts called ===');
+  
+  // Primero obtener productos
+  const { data: productsData, error: productsError } = await client
     .from('products')
     .select(`
       *,
-      category:categories(id, name, slug),
-      images:product_images(*)
+      category:categories(id, name, slug)
     `)
     .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching products:', error);
+  if (productsError) {
+    console.error('Error fetching products:', productsError);
     return [];
   }
 
-  return data || [];
+  console.log('Products fetched:', productsData?.length);
+
+  // Luego obtener todas las imágenes
+  const { data: imagesData, error: imagesError } = await client
+    .from('product_images')
+    .select('*');
+
+  console.log('Images query error:', imagesError);
+  console.log('Images fetched:', imagesData?.length);
+
+  if (imagesError) {
+    console.error('Error fetching product images:', imagesError);
+  }
+
+  // Mapear imágenes a productos
+  const productsWithImages = productsData?.map(product => {
+    const productImages = imagesData?.filter(img => img.product_id === product.id) || [];
+    console.log(`Product ${product.id} has ${productImages.length} images`);
+    return {
+      ...product,
+      images: productImages
+    };
+  }) || [];
+
+  console.log('First product with images:', productsWithImages[0]);
+
+  return productsWithImages;
 }
 
 /**
  * Obtiene productos destacados
  */
 export async function getFeaturedProducts(): Promise<Product[]> {
-  const { data, error } = await supabase
+  const { data: productsData, error: productsError } = await supabase
     .from('products')
     .select(`
       *,
-      category:categories(id, name, slug),
-      images:product_images(*)
+      category:categories(id, name, slug)
     `)
     .eq('featured', true)
     .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching featured products:', error);
+  if (productsError) {
+    console.error('Error fetching featured products:', productsError);
     return [];
   }
 
-  return data || [];
+  // Obtener todas las imágenes
+  const { data: imagesData, error: imagesError } = await supabase
+    .from('product_images')
+    .select('*');
+
+  if (imagesError) {
+    console.error('Error fetching product images:', imagesError);
+  }
+
+  // Mapear imágenes a productos
+  const productsWithImages = productsData?.map(product => ({
+    ...product,
+    images: imagesData?.filter(img => img.product_id === product.id) || []
+  })) || [];
+
+  return productsWithImages;
 }
 
 /**
  * Obtiene un producto por slug
  */
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  const { data, error } = await supabase
+  const { data: productData, error: productError } = await supabase
     .from('products')
     .select(`
       *,
-      category:categories(id, name, slug),
-      images:product_images(*)
+      category:categories(id, name, slug)
     `)
     .eq('slug', slug)
     .single();
 
-  if (error) {
-    console.error('Error fetching product by slug:', error);
+  if (productError) {
+    console.error('Error fetching product by slug:', productError);
     return null;
   }
 
-  return data;
+  // Obtener imágenes del producto
+  const { data: imagesData, error: imagesError } = await supabase
+    .from('product_images')
+    .select('*')
+    .eq('product_id', productData.id);
+
+  if (imagesError) {
+    console.error('Error fetching product images:', imagesError);
+  }
+
+  return {
+    ...productData,
+    images: imagesData || []
+  };
 }
 
 /**
@@ -171,10 +225,12 @@ export async function createProduct(product: {
   price: number;
   currency: 'CUP' | 'USD';
   slug: string;
+  image_url?: string;
   featured?: boolean;
   category_id?: string;
-}): Promise<Product | null> {
-  const { data, error } = await supabase
+}, supabaseClient?: any): Promise<Product | null> {
+  const client = supabaseClient || supabase;
+  const { data, error } = await client
     .from('products')
     .insert(product)
     .select()
@@ -197,10 +253,12 @@ export async function updateProduct(id: string, product: Partial<{
   price: number;
   currency: 'CUP' | 'USD';
   slug: string;
+  image_url: string;
   featured: boolean;
   category_id: string;
-}>): Promise<Product | null> {
-  const { data, error } = await supabase
+}>, supabaseClient?: any): Promise<Product | null> {
+  const client = supabaseClient || supabase;
+  const { data, error } = await client
     .from('products')
     .update(product)
     .eq('id', id)
@@ -218,17 +276,27 @@ export async function updateProduct(id: string, product: Partial<{
 /**
  * Elimina un producto
  */
-export async function deleteProduct(id: string): Promise<boolean> {
-  const { error } = await supabase
+export async function deleteProduct(id: string, supabaseClient?: any): Promise<boolean> {
+  const client = supabaseClient || supabase;
+  console.log('=== DEBUG: deleteProduct ===');
+  console.log('Product ID:', id);
+  console.log('Client type:', supabaseClient ? 'authenticated' : 'default');
+  
+  // Primero eliminar las imágenes del producto
+  await deleteProductImages(id, client);
+  
+  const { error } = await client
     .from('products')
     .delete()
     .eq('id', id);
 
   if (error) {
     console.error('Error deleting product:', error);
+    console.error('Error details:', { message: error.message, status: error.status });
     return false;
   }
 
+  console.log('Product deleted successfully');
   return true;
 }
 
@@ -271,8 +339,9 @@ export async function addProductImages(
 /**
  * Elimina todas las imágenes de un producto
  */
-export async function deleteProductImages(productId: string): Promise<boolean> {
-  const { error } = await supabase
+export async function deleteProductImages(productId: string, supabaseClient?: any): Promise<boolean> {
+  const client = supabaseClient || supabase;
+  const { error } = await client
     .from('product_images')
     .delete()
     .eq('product_id', productId);
@@ -328,22 +397,37 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
  */
 export async function getProductsByCategory(categorySlug: string, supabaseClient?: any): Promise<Product[]> {
   const client = supabaseClient || supabase;
-  const { data, error } = await client
+  
+  const { data: productsData, error: productsError } = await client
     .from('products')
     .select(`
       *,
-      category:categories(id, name, slug),
-      images:product_images(*)
+      category:categories(id, name, slug)
     `)
     .eq('category.slug', categorySlug)
     .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching products by category:', error);
+  if (productsError) {
+    console.error('Error fetching products by category:', productsError);
     return [];
   }
 
-  return data || [];
+  // Obtener todas las imágenes
+  const { data: imagesData, error: imagesError } = await client
+    .from('product_images')
+    .select('*');
+
+  if (imagesError) {
+    console.error('Error fetching product images:', imagesError);
+  }
+
+  // Mapear imágenes a productos
+  const productsWithImages = productsData?.map(product => ({
+    ...product,
+    images: imagesData?.filter(img => img.product_id === product.id) || []
+  })) || [];
+
+  return productsWithImages;
 }
 
 /**
@@ -552,22 +636,30 @@ export async function uploadFile(
   console.log('Bucket:', bucket);
   console.log('Path:', path);
   console.log('File:', { name: file.name, size: file.size, type: file.type });
+  console.log('Client type:', supabaseClient ? 'authenticated' : 'default');
   
-  const { data, error } = await client.storage
-    .from(bucket)
-    .upload(path, file, {
-      cacheControl: '3600',
-      upsert: true
-    });
+  try {
+    const { data, error } = await client.storage
+      .from(bucket)
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
 
-  console.log('Resultado upload:', { data, error });
+    console.log('Resultado upload:', { data, error });
 
-  if (error) {
-    console.error('Error uploading file:', error);
+    if (error) {
+      console.error('Error uploading file:', error);
+      console.error('Error details:', { message: error.message, status: error.status });
+      return null;
+    }
+
+    console.log('File uploaded successfully, path:', data.path);
+    return data.path;
+  } catch (err) {
+    console.error('Exception in uploadFile:', err);
     return null;
   }
-
-  return data.path;
 }
 
 /**

@@ -33,10 +33,6 @@ lerna-debug.log*
 Thumbs.db
 .DS_Store
 
-# Strapi
-.tmp/
-.cache/
-
 # Build artifacts
 *.tsbuildinfo
 

@@ -4,6 +4,10 @@ import Hero from "../components/astro/HeroSection.astro";
 import FeaturedProducts from "../components/astro/FeaturedProducts.astro";
 import CallToAction from "../components/astro/CallToAction.astro"
 
+// Desabilitar caché para esta página
+Astro.response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+Astro.response.headers.set('Pragma', 'no-cache');
+Astro.response.headers.set('Expires', '0');
 ---
 
 <Layout title="Inicio">
