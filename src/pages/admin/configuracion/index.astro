@@ -75,7 +75,7 @@ if (Astro.request.method === 'POST') {
               id="store_name"
               name="store_name"
               value={config?.store_name || ''}
-              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-base"
             />
           </div>
           <div>
@@ -88,7 +88,7 @@ if (Astro.request.method === 'POST') {
                 id="logo_file"
                 name="logo_file"
                 accept="image/*"
-                class="flex-1 px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                class="flex-1 px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-base"
               />
               {config?.logo_url && (
                 <div class="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
@@ -125,7 +125,7 @@ if (Astro.request.method === 'POST') {
               id="email"
               name="email"
               value={config?.email || ''}
-              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-base"
             />
           </div>
           <div>
@@ -137,7 +137,7 @@ if (Astro.request.method === 'POST') {
               id="phone"
               name="phone"
               value={config?.phone || ''}
-              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-base"
             />
           </div>
           <div>
@@ -149,7 +149,7 @@ if (Astro.request.method === 'POST') {
               id="whatsapp_number"
               name="whatsapp_number"
               value={config?.whatsapp_number || ''}
-              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-base"
               placeholder="53123456789"
             />
           </div>
@@ -162,7 +162,7 @@ if (Astro.request.method === 'POST') {
               id="address"
               name="address"
               value={config?.address || ''}
-              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-base"
             />
           </div>
         </div>
@@ -181,7 +181,7 @@ if (Astro.request.method === 'POST') {
               id="facebook_url"
               name="facebook_url"
               value={config?.facebook_url || ''}
-              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-base"
               placeholder="https://facebook.com/mitienda"
             />
           </div>
@@ -194,7 +194,7 @@ if (Astro.request.method === 'POST') {
               id="instagram_url"
               name="instagram_url"
               value={config?.instagram_url || ''}
-              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-base"
               placeholder="https://instagram.com/mitienda"
             />
           </div>
@@ -207,7 +207,7 @@ if (Astro.request.method === 'POST') {
               id="twitter_url"
               name="twitter_url"
               value={config?.twitter_url || ''}
-              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+              class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-base"
               placeholder="https://twitter.com/mitienda"
             />
           </div>
@@ -215,10 +215,10 @@ if (Astro.request.method === 'POST') {
       </div>
 
       <!-- Submit -->
-      <div class="flex gap-4 pt-6 border-t border-neutral-200">
+      <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-neutral-200">
         <button
           type="submit"
-          class="bg-neutral-900 text-white py-3 px-6 rounded-lg font-medium hover:bg-neutral-800 transition-colors"
+          class="w-full sm:w-auto bg-neutral-900 text-white py-3 px-6 rounded-lg font-medium hover:bg-neutral-800 transition-colors"
         >
           Guardar Cambios
         </button>
