@@ -43,7 +43,7 @@ if (Astro.request.method === 'POST') {
     name,
     slug,
     description: description || undefined,
-  });
+  }, supabase);
 
   if (updated) {
     return Astro.redirect('/admin/categorias');

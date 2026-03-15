@@ -32,7 +32,7 @@ if (Astro.request.method === 'POST') {
     newConfig.id = config.id;
   }
 
-  const result = await updateStoreConfig(newConfig);
+  const result = await updateStoreConfig(newConfig, supabase);
 
   if (result) {
     successMessage = 'Configuración actualizada correctamente';

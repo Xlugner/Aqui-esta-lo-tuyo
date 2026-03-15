@@ -13,7 +13,7 @@ if (Astro.request.method === 'POST') {
   const categoryId = formData.get('categoryId')?.toString();
 
   if (action === 'delete' && categoryId) {
-    await deleteCategory(categoryId);
+    await deleteCategory(categoryId, supabase);
     return Astro.redirect('/admin/categorias');
   }
 }

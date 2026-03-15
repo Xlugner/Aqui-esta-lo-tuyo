@@ -437,18 +437,23 @@ export async function createCategory(category: {
   name: string;
   slug: string;
   description?: string;
-}): Promise<Category | null> {
-  const { data, error } = await supabase
+}, supabaseClient?: any): Promise<Category | null> {
+  const client = supabaseClient || supabase;
+  
+  console.log('🔍 Creating category:', category);
+  
+  const { data, error } = await client
     .from('categories')
     .insert(category)
     .select()
     .single();
 
   if (error) {
-    console.error('Error creating category:', error);
+    console.error('❌ Error creating category:', error);
     return null;
   }
 
+  console.log('✅ Category created:', data);
   return data;
 }
 
@@ -459,8 +464,12 @@ export async function updateCategory(id: string, category: Partial<{
   name: string;
   slug: string;
   description: string;
-}>): Promise<Category | null> {
-  const { data, error } = await supabase
+}>, supabaseClient?: any): Promise<Category | null> {
+  const client = supabaseClient || supabase;
+  
+  console.log('🔍 Updating category:', id, category);
+  
+  const { data, error } = await client
     .from('categories')
     .update(category)
     .eq('id', id)
@@ -468,27 +477,33 @@ export async function updateCategory(id: string, category: Partial<{
     .single();
 
   if (error) {
-    console.error('Error updating category:', error);
+    console.error('❌ Error updating category:', error);
     return null;
   }
 
+  console.log('✅ Category updated:', data);
   return data;
 }
 
 /**
  * Elimina una categoría
  */
-export async function deleteCategory(id: string): Promise<boolean> {
-  const { error } = await supabase
+export async function deleteCategory(id: string, supabaseClient?: any): Promise<boolean> {
+  const client = supabaseClient || supabase;
+  
+  console.log('🔍 Deleting category:', id);
+  
+  const { error } = await client
     .from('categories')
     .delete()
     .eq('id', id);
 
   if (error) {
-    console.error('Error deleting category:', error);
+    console.error('❌ Error deleting category:', error);
     return false;
   }
 
+  console.log('✅ Category deleted');
   return true;
 }
 
@@ -514,18 +529,23 @@ export async function getStoreConfig(): Promise<StoreConfig | null> {
 /**
  * Actualiza la configuración de la tienda
  */
-export async function updateStoreConfig(config: Partial<StoreConfig>): Promise<StoreConfig | null> {
-  const { data, error } = await supabase
+export async function updateStoreConfig(config: Partial<StoreConfig>, supabaseClient?: any): Promise<StoreConfig | null> {
+  const client = supabaseClient || supabase;
+  
+  console.log('🔍 Updating store config:', config);
+  
+  const { data, error } = await client
     .from('store_config')
     .upsert(config)
     .select()
     .single();
 
   if (error) {
-    console.error('Error updating store config:', error);
+    console.error('❌ Error updating store config:', error);
     return null;
   }
 
+  console.log('✅ Store config updated:', data);
   return data;
 }
 
