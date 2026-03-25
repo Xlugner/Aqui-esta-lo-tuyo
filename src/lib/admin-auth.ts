@@ -41,22 +41,32 @@ export interface AdminUser {
 
 // Verificar si el usuario actual es admin
 export async function checkIsAdmin(supabase: ReturnType<typeof getSupabaseServer>): Promise<boolean> {
-  const { data: { user } } = await supabase.auth.getUser();
-  console.log('🔍 Current user:', user);
-  
-  if (!user) {
-    console.log('❌ No user found');
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    console.log('🔍 Current user:', user);
+    
+    if (!user) {
+      console.log('❌ No user found');
+      return false;
+    }
+
+    const { data: adminUser, error } = await supabase
+      .from('admin_users')
+      .select('id')
+      .eq('id', user.id)
+      .single();
+
+    if (error) {
+      console.error('❌ Error checking admin status:', error);
+      return false;
+    }
+
+    console.log('👤 Admin user found:', adminUser);
+    return !!adminUser;
+  } catch (error) {
+    console.error('❌ Exception in checkIsAdmin:', error);
     return false;
   }
-
-  const { data: adminUser } = await supabase
-    .from('admin_users')
-    .select('id')
-    .eq('id', user.id)
-    .single();
-
-  console.log('👤 Admin user found:', adminUser);
-  return !!adminUser;
 }
 
 // Obtener el usuario admin actual
@@ -156,6 +166,11 @@ export async function changePassword(
 
 // Verificar sesión activa (para middleware)
 export async function verifyAdminSession(cookies: AstroCookies): Promise<boolean> {
-  const supabase = getSupabaseServer(cookies);
-  return checkIsAdmin(supabase);
+  try {
+    const supabase = getSupabaseServer(cookies);
+    return await checkIsAdmin(supabase);
+  } catch (error) {
+    console.error('❌ Error verifying admin session:', error);
+    return false;
+  }
 }
