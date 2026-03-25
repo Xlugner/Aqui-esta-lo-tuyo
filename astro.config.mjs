@@ -3,15 +3,10 @@ import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
 import vercel from '@astrojs/vercel';
 
-// https://astro.build/config
 export default defineConfig({
-  integrations: [
-    react(),
-    tailwind()
-  ],
+  integrations: [react(), tailwind()],
   output: 'server',
-  adapter: vercel(),
-  server: {
-    port: 3000
-  }
+  adapter: vercel({
+    webAnalytics: { enabled: false },
+  }),
 });
