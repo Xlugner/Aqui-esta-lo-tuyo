@@ -1,0 +1,170 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getProductBySlug, getSupabaseImage } from "../../lib/supabase";
+import { QuantitySelector } from "../../components/react/QuantitySelector";
+import ProductGallery from "../../components/react/ProductGallery";
+import BackButton from "../../components/astro/BackButton.astro";
+
+// Desabilitar caché para esta página
+Astro.response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+Astro.response.headers.set('Pragma', 'no-cache');
+Astro.response.headers.set('Expires', '0');
+
+// Obtener el slug de la URL
+const { slug } = Astro.params;
+
+// Validar que el slug existe
+if (!slug) {
+  return Astro.redirect("/productos");
+}
+
+// Buscar el producto dinámicamente
+const product = await getProductBySlug(slug);
+
+if (!product) {
+  return Astro.redirect("/404");
+}
+
+console.log('=== DEBUG [slug].astro ===');
+console.log('Product slug:', slug);
+console.log('Product:', product);
+console.log('Product images:', product.images);
+
+const { name, description, price, currency, images, category } = product;
+
+// Preparar imágenes para la galería
+const galleryImages = images && images.length > 0
+  ? images.map((img) => ({
+      url: getSupabaseImage(img.image_url),
+      alt: img.alt_text || name,
+    }))
+  : [{ url: '/placeholder.jpg', alt: name }];
+
+const imageUrl = galleryImages[0]?.url || '/placeholder.jpg';
+
+const cartItem = {
+  id: product.id,
+  name,
+  price,
+  currency,
+  slug,
+  image: imageUrl,
+};
+---
+
+<Layout title={name}>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <BackButton fallbackUrl="/productos" />
+
+    <!-- Grid Principal: Imagen + Info -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+      <!-- Galería de Imágenes -->
+      <div>
+        <ProductGallery client:load images={galleryImages} />
+      </div>
+
+      <!-- Información del Producto -->
+      <div class="flex flex-col">
+        <!-- Título -->
+        <h1 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
+          {name}
+        </h1>
+
+        <!-- Categoría y Stock -->
+        <div class="flex items-center gap-4 mb-6">
+          {
+            category?.name && (
+              <div class="flex items-center gap-2 text-gray-600">
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+                <span class="font-medium">{category.name}</span>
+              </div>
+            )
+          }
+        </div>
+
+        <!-- Precios -->
+        <div class="mb-6">
+          <div class="flex items-baseline gap-3">
+            <span class="text-4xl font-bold text-primary-500">
+              $ {price.toLocaleString()}
+              {currency}
+            </span>
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div class="mb-8 pb-8 border-b">
+          <p class="text-gray-600 leading-relaxed">
+            {description}
+          </p>
+        </div>
+
+        <!-- Selector de Cantidad y Botones -->
+        <div class="space-y-4">
+          <QuantitySelector client:load product={cartItem} />
+        </div>
+
+        <!-- Información adicional -->
+        <div class="mt-8 pt-8 border-t">
+          <h3 class="font-semibold text-gray-800 mb-4 text-lg">
+            Información adicional
+          </h3>
+          <ul class="space-y-3">
+            <li class="flex items-center gap-3 text-gray-600">
+              <svg
+                class="w-5 h-5 text-gray-800 flex-shrink-0"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span>Pedido por WhatsApp</span>
+            </li>
+            <li class="flex items-center gap-3 text-gray-600">
+              <svg
+                class="w-5 h-5 text-gray-800 flex-shrink-0"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span>Atención personalizada</span>
+            </li>
+            <li class="flex items-center gap-3 text-gray-600">
+              <svg
+                class="w-5 h-5 text-gray-800 flex-shrink-0"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span>Consulta disponibilidad</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
