@@ -4,11 +4,9 @@ node_modules/
 .pnp.js
 
 # Production
-dist/
 build/
 .next/
 out/
-.vercel/
 
 # Environment variables
 .env
