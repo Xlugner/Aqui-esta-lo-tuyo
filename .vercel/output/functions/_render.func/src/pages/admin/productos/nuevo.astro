@@ -4,6 +4,8 @@ import NotificationScript from '../../../components/admin/NotificationScript.ast
 import { getSupabaseServer } from '../../../lib/admin-auth';
 import { createProduct, getCategories, addProductImages, uploadFile } from '../../../lib/supabase';
 
+export const prerender = false;
+
 const supabase = getSupabaseServer(Astro.cookies);
 const categories = await getCategories(supabase);
 

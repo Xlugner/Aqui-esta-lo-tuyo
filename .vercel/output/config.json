@@ -72,7 +72,15 @@
 			"dest": "_render"
 		},
 		{
-			"src": "^/productos/([^/]+?)/?$",
+			"src": "^/contacto/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/productos/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/$",
 			"dest": "_render"
 		},
 		{

@@ -2,6 +2,8 @@
 import AdminLayout from '../../../components/admin/AdminLayout.astro';
 import { getSupabaseServer, changePassword, getCurrentAdmin } from '../../../lib/admin-auth';
 
+export const prerender = false;
+
 const supabase = getSupabaseServer(Astro.cookies);
 const admin = await getCurrentAdmin(supabase);
 

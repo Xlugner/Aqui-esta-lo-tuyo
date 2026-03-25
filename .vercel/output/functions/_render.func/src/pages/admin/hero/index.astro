@@ -5,6 +5,8 @@ import { getSupabaseServer } from '../../../lib/admin-auth';
 import { getHeroSection, updateHeroSection, uploadFile, getPublicUrl } from '../../../lib/supabase';
 import type { HeroImage } from '../../../lib/supabase';
 
+export const prerender = false;
+
 const supabase = getSupabaseServer(Astro.cookies);
 const heroSection = await getHeroSection(supabase);
 const existingImages = heroSection?.images || [];

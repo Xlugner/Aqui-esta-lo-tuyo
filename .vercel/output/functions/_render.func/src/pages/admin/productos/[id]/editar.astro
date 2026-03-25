@@ -4,6 +4,8 @@ import NotificationScript from '../../../../components/admin/NotificationScript.
 import { getSupabaseServer } from '../../../../lib/admin-auth';
 import { getProductById, updateProduct, getCategories, deleteProductImages, addProductImages, uploadFile } from '../../../../lib/supabase';
 
+export const prerender = false;
+
 const { id } = Astro.params;
 
 if (!id) {

@@ -4,6 +4,8 @@ import { getSupabaseServer } from '../../../lib/admin-auth';
 import { getStoreConfig, updateStoreConfig, uploadFile, getPublicUrl } from '../../../lib/supabase';
 import type { StoreConfig } from '../../../lib/supabase';
 
+export const prerender = false;
+
 const supabase = getSupabaseServer(Astro.cookies);
 const config = await getStoreConfig();
 

@@ -3,6 +3,8 @@ import AdminLayout from '../../components/admin/AdminLayout.astro';
 import { getSupabaseServer } from '../../lib/admin-auth';
 import { getProducts, getCategories } from '../../lib/supabase';
 
+export const prerender = false;
+
 const supabase = getSupabaseServer(Astro.cookies);
 const products = await getProducts(supabase);
 const categories = await getCategories(supabase);

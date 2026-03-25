@@ -1,0 +1,134 @@
+import { c as createComponent } from './astro-component_BoJy0tSH.mjs';
+import 'piccolore';
+import { K as renderTemplate, L as maybeRenderHead, a2 as addAttribute } from './sequence_BUPkIzlm.mjs';
+import { r as renderComponent } from './entrypoint_Hdn9W_io.mjs';
+import { r as renderScript } from './script_8Lc7_j8H.mjs';
+import { $ as $$AdminLayout } from './AdminLayout_CF4daztq.mjs';
+import { $ as $$NotificationScript } from './NotificationScript_aqGyLlsd.mjs';
+import { g as getSupabaseServer } from './admin-auth_HFCdXdjY.mjs';
+import { g as getCategories, j as createProduct, b as uploadFile, k as addProductImages } from './supabase_XKs3TGPF.mjs';
+
+const prerender = false;
+const $$Nuevo = createComponent(async ($$result, $$props, $$slots) => {
+  const Astro2 = $$result.createAstro($$props, $$slots);
+  Astro2.self = $$Nuevo;
+  const supabase = getSupabaseServer(Astro2.cookies);
+  const categories = await getCategories(supabase);
+  let errorMessage;
+  if (Astro2.request.method === "POST") {
+    const formData = await Astro2.request.formData();
+    const name = formData.get("name")?.toString() || "";
+    const description = formData.get("description")?.toString() || "";
+    const price = parseFloat(formData.get("price")?.toString() || "0");
+    const currency = formData.get("currency")?.toString() || "USD";
+    const category_id = formData.get("category_id")?.toString() || void 0;
+    const featured = formData.get("featured") === "on";
+    const slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const imageFiles = formData.getAll("image_file");
+    const imageUrls = formData.getAll("image_url");
+    console.log("=== DEBUG: Creando producto ===");
+    console.log("Datos del producto:", { name, description, price, currency, category_id, featured });
+    console.log("Archivos recibidos:", imageFiles.length);
+    console.log("Archivos detalles:", imageFiles.map((f) => ({ name: f.name, size: f.size, type: f.type })));
+    console.log("URLs recibidas:", imageUrls);
+    const product = await createProduct({
+      name,
+      description,
+      price,
+      currency,
+      slug,
+      featured,
+      category_id
+    }, supabase);
+    console.log("Producto creado:", product);
+    if (product) {
+      const imagesToAdd = [];
+      const validFiles = imageFiles.filter((f) => f && f.size > 0);
+      console.log("Archivos válidos:", validFiles.length);
+      for (let i = 0; i < validFiles.length; i++) {
+        const file = validFiles[i];
+        console.log(`Procesando archivo ${i}:`, file.name);
+        const fileName = `${Date.now()}-${i}-${file.name}`;
+        const path = `products/${product.id}/${fileName}`;
+        console.log("Subiendo a:", path);
+        const uploadedPath = await uploadFile("products", path, file, supabase);
+        console.log("Resultado uploadFile:", uploadedPath);
+        if (uploadedPath) {
+          const supabaseUrl = "https://jgyoodhsznqbmxibbszm.supabase.co";
+          const publicUrl = `${supabaseUrl}/storage/v1/object/public/products/${uploadedPath}`;
+          console.log("URL pública construida:", publicUrl);
+          imagesToAdd.push({
+            image_url: publicUrl,
+            alt_text: "",
+            order_index: imagesToAdd.length
+          });
+        } else {
+          console.error(`Error al subir archivo ${i}`);
+        }
+      }
+      for (let i = 0; i < imageUrls.length; i++) {
+        const url = imageUrls[i]?.trim();
+        if (url) {
+          console.log(`Procesando URL ${i}:`, url);
+          imagesToAdd.push({
+            image_url: url,
+            alt_text: "",
+            order_index: imagesToAdd.length
+          });
+        }
+      }
+      if (imagesToAdd.length > 0) {
+        console.log("Guardando imágenes:", imagesToAdd);
+        const result = await addProductImages(product.id, imagesToAdd, supabase);
+        console.log("Resultado addProductImages:", result);
+        if (result) {
+          setTimeout(() => {
+          }, 1e3);
+        } else {
+          errorMessage = "Producto creado pero hubo error al guardar las imágenes";
+        }
+      } else {
+        console.log("No hay imágenes para guardar");
+      }
+    } else {
+      errorMessage = "Error al crear el producto";
+    }
+  }
+  return renderTemplate`${renderComponent($$result, "AdminLayout", $$AdminLayout, { "title": "Nuevo Producto", "currentPath": "/admin/productos" }, { "default": async ($$result2) => renderTemplate` ${maybeRenderHead()}<div class="max-w-4xl mx-auto"> <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6"> <a href="/admin/productos" class="p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"> <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path> </svg> </a> <h1 class="text-2xl sm:text-3xl font-bold text-neutral-800">Nuevo Producto</h1> </div> ${errorMessage && renderTemplate`<div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6"> <p class="text-sm font-medium">${errorMessage}</p> </div>`} <form method="POST" enctype="multipart/form-data" data-notifications="true" class="bg-white rounded-lg shadow p-6 space-y-6"> <!-- Nombre --> <div> <label for="name" class="block text-sm font-medium text-neutral-700 mb-2">
+Nombre del producto *
+</label> <input type="text" id="name" name="name" required class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent" placeholder="Ej: Camiseta de algodón"> </div> <!-- Descripción --> <div> <label for="description" class="block text-sm font-medium text-neutral-700 mb-2">
+Descripción *
+</label> <textarea id="description" name="description" required rows="4" class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent" placeholder="Describe el producto..."></textarea> </div> <!-- Precio y Moneda --> <div class="grid grid-cols-1 sm:grid-cols-2 gap-4"> <div> <label for="price" class="block text-sm font-medium text-neutral-700 mb-2">
+Precio *
+</label> <input type="number" id="price" name="price" required min="0" step="0.01" class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-base" placeholder="0.00"> </div> <div> <label for="currency" class="block text-sm font-medium text-neutral-700 mb-2">
+Moneda *
+</label> <select id="currency" name="currency" class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-base"> <option value="USD">USD</option> <option value="CUP">CUP</option> </select> </div> </div> <!-- Categoría --> <div> <label for="category_id" class="block text-sm font-medium text-neutral-700 mb-2">
+Categoría
+</label> <select id="category_id" name="category_id" class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"> <option value="">Sin categoría</option> ${categories.map((cat) => renderTemplate`<option${addAttribute(cat.id, "value")}>${cat.name}</option>`)} </select> </div> <!-- Destacado --> <div class="flex items-center gap-3"> <input type="checkbox" id="featured" name="featured" class="w-5 h-5 text-neutral-900 border-neutral-300 rounded focus:ring-neutral-900"> <label for="featured" class="text-sm font-medium text-neutral-700">
+Marcar como destacado
+</label> </div> <!-- Imágenes (URLs o Archivos) --> <div> <label class="block text-sm font-medium text-neutral-700 mb-2">
+Imágenes (URLs o Archivos)
+</label> <div class="space-y-4"> <div id="image-urls" class="space-y-2"> <input type="url" name="image_url" class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent" placeholder="https://ejemplo.com/imagen.jpg"> </div> <button type="button" onclick="addImageUrl()" class="text-sm text-neutral-600 hover:text-neutral-900">
++ Agregar URL
+</button> <div class="border-t border-neutral-200 pt-4"> <label class="block text-sm font-medium text-neutral-700 mb-2">
+o subir archivos desde tu dispositivo
+</label> <input type="file" name="image_file" multiple accept="image/*" class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"> </div> </div> </div> <!-- Submit --> <div class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-neutral-200"> <a href="/admin/productos" class="px-6 py-3 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors text-center">
+Cancelar
+</a> <button type="submit" class="flex-1 bg-neutral-900 text-white py-3 px-6 rounded-lg font-medium hover:bg-neutral-800 transition-colors">
+Crear Producto
+</button> </div> </form> </div> ` })} ${renderScript($$result, "/home/ronal/Proyectos/Aqui esta lo tuyo/src/pages/admin/productos/nuevo.astro?astro&type=script&index=0&lang.ts")} ${renderComponent($$result, "NotificationScript", $$NotificationScript, {})}`;
+}, "/home/ronal/Proyectos/Aqui esta lo tuyo/src/pages/admin/productos/nuevo.astro", void 0);
+const $$file = "/home/ronal/Proyectos/Aqui esta lo tuyo/src/pages/admin/productos/nuevo.astro";
+const $$url = "/admin/productos/nuevo";
+
+const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: $$Nuevo,
+  file: $$file,
+  prerender,
+  url: $$url
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const page = () => _page;
+
+export { page };

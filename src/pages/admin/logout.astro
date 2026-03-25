@@ -1,6 +1,8 @@
 ---
 import { signOutAdmin } from '../../lib/admin-auth';
 
+export const prerender = false;
+
 await signOutAdmin(Astro.cookies);
 
 return Astro.redirect('/admin/login');
