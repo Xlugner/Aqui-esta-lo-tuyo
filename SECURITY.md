@@ -2,16 +2,50 @@
 
 ## Variables de Entorno Sensibles
 
-Este proyecto utiliza variables de entorno para almacenar credenciales sensibles. **NUNCA** commits estas credenciales al repositorio.
+Este proyecto utiliza variables de entorno para almacenar credenciales. Es importante entender cuáles son públicas y cuáles privadas.
 
-### Variables Requeridas en Producción
+### Variables Públicas vs Privadas
+
+**Variables PÚBLICAS** (prefijo `PUBLIC_`):
+- Se envían al cliente (visible en el navegador)
+- Necesarias para que el frontend funcione
+- Ejemplos: URLs de Supabase, claves públicas de APIs
+- ✅ Seguro incluirlas en `.env` local
+- ✅ Seguro incluirlas en variables de entorno de producción
+
+**Variables PRIVADAS** (sin prefijo `PUBLIC_`):
+- Solo se usan en el servidor
+- Nunca se envían al cliente
+- Ejemplos: contraseñas, API keys privadas
+- ⚠️ Incluir en `.env` local solo si es necesario
+- ✅ Configurar en variables de entorno de producción
+
+### Variables Requeridas en Desarrollo Local
 
 ```bash
-# Supabase (obtén de https://supabase.com)
+# Supabase (PÚBLICO - necesario para el frontend)
 PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 
-# Admin (usa bcrypt para la contraseña)
+# Tienda (PÚBLICO - necesario para el frontend)
+PUBLIC_STORE_NAME=Mi Tienda Online
+PUBLIC_STORE_EMAIL=contacto@mitienda.com
+PUBLIC_WHATSAPP_NUMBER=34123456789
+```
+
+### Variables Requeridas en Producción
+
+En tu plataforma de hosting (Vercel, Netlify, Railway, etc.), configura:
+
+```bash
+# Todas las variables PUBLIC_* (igual que en desarrollo)
+PUBLIC_SUPABASE_URL=...
+PUBLIC_SUPABASE_ANON_KEY=...
+PUBLIC_STORE_NAME=...
+PUBLIC_STORE_EMAIL=...
+PUBLIC_WHATSAPP_NUMBER=...
+
+# Variables privadas (solo en producción)
 ADMIN_EMAIL=admin@tienda.com
 ADMIN_PASSWORD_HASH=your-bcrypt-hash-here
 ```
