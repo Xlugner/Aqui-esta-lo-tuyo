@@ -2,8 +2,8 @@
 import { c as createComponent } from './astro-component_BoJy0tSH.mjs';
 import 'piccolore';
 import { K as renderTemplate, L as maybeRenderHead } from './sequence_BUPkIzlm.mjs';
-import { r as renderComponent } from './entrypoint_DRoMatCi.mjs';
-import { c as cartItems, t as totalsByCurrency, a as clearCart, $ as $$Layout } from './Layout_CxLreAne.mjs';
+import { r as renderComponent } from './entrypoint_Ba8utNrS.mjs';
+import { c as cartItems, t as totalsByCurrency, a as clearCart, $ as $$Layout } from './Layout_7XR12vwv.mjs';
 import { jsxs, jsx, Fragment } from 'react/jsx-runtime';
 import { useState, useEffect } from 'react';
 import { a as getStoreConfig } from './supabase_BFkBUlFH.mjs';

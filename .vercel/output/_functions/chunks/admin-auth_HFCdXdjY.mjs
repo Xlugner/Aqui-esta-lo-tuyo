@@ -21,15 +21,24 @@ function getSupabaseServer(cookies) {
   return supabase;
 }
 async function checkIsAdmin(supabase) {
-  const { data: { user } } = await supabase.auth.getUser();
-  console.log("🔍 Current user:", user);
-  if (!user) {
-    console.log("❌ No user found");
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    console.log("🔍 Current user:", user);
+    if (!user) {
+      console.log("❌ No user found");
+      return false;
+    }
+    const { data: adminUser, error } = await supabase.from("admin_users").select("id").eq("id", user.id).single();
+    if (error) {
+      console.error("❌ Error checking admin status:", error);
+      return false;
+    }
+    console.log("👤 Admin user found:", adminUser);
+    return !!adminUser;
+  } catch (error) {
+    console.error("❌ Exception in checkIsAdmin:", error);
     return false;
   }
-  const { data: adminUser } = await supabase.from("admin_users").select("id").eq("id", user.id).single();
-  console.log("👤 Admin user found:", adminUser);
-  return !!adminUser;
 }
 async function getCurrentAdmin(supabase) {
   const { data: { user } } = await supabase.auth.getUser();
@@ -94,8 +103,13 @@ async function changePassword(newPassword, cookies) {
   return { success: true };
 }
 async function verifyAdminSession(cookies) {
-  const supabase = getSupabaseServer(cookies);
-  return checkIsAdmin(supabase);
+  try {
+    const supabase = getSupabaseServer(cookies);
+    return await checkIsAdmin(supabase);
+  } catch (error) {
+    console.error("❌ Error verifying admin session:", error);
+    return false;
+  }
 }
 
 export { signOutAdmin as a, getCurrentAdmin as b, changePassword as c, getSupabaseServer as g, signInAdmin as s, verifyAdminSession as v };

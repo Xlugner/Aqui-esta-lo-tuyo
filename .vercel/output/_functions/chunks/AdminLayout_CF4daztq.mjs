@@ -3,7 +3,7 @@ import 'piccolore';
 import { b7 as renderHead, b8 as renderSlot, a2 as addAttribute, K as renderTemplate } from './sequence_BUPkIzlm.mjs';
 import 'clsx';
 import { r as renderScript } from './script_8Lc7_j8H.mjs';
-import { g as getSupabaseServer, b as getCurrentAdmin } from './admin-auth_CO7OFhP7.mjs';
+import { g as getSupabaseServer, b as getCurrentAdmin } from './admin-auth_HFCdXdjY.mjs';
 
 const $$AdminLayout = createComponent(async ($$result, $$props, $$slots) => {
   const Astro2 = $$result.createAstro($$props, $$slots);

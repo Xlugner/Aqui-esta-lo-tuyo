@@ -2,10 +2,10 @@
 import { c as createComponent } from './astro-component_BoJy0tSH.mjs';
 import 'piccolore';
 import { K as renderTemplate, L as maybeRenderHead, a2 as addAttribute } from './sequence_BUPkIzlm.mjs';
-import { r as renderComponent } from './entrypoint_DRoMatCi.mjs';
-import { $ as $$AdminLayout } from './AdminLayout_d0iY4EX0.mjs';
+import { r as renderComponent } from './entrypoint_Ba8utNrS.mjs';
+import { $ as $$AdminLayout } from './AdminLayout_CF4daztq.mjs';
 import { $ as $$NotificationScript } from './NotificationScript_aqGyLlsd.mjs';
-import { g as getSupabaseServer } from './admin-auth_CO7OFhP7.mjs';
+import { g as getSupabaseServer } from './admin-auth_HFCdXdjY.mjs';
 import { u as updateCategory } from './supabase_BFkBUlFH.mjs';
 
 const $$Editar = createComponent(async ($$result, $$props, $$slots) => {

@@ -2,8 +2,8 @@
 import { c as createComponent } from './astro-component_BoJy0tSH.mjs';
 import 'piccolore';
 import { K as renderTemplate, L as maybeRenderHead } from './sequence_BUPkIzlm.mjs';
-import { r as renderComponent } from './entrypoint_DRoMatCi.mjs';
-import { $ as $$Layout } from './Layout_CxLreAne.mjs';
+import { r as renderComponent } from './entrypoint_Ba8utNrS.mjs';
+import { $ as $$Layout } from './Layout_7XR12vwv.mjs';
 
 const $$Contacto = createComponent(($$result, $$props, $$slots) => {
   return renderTemplate`${renderComponent($$result, "Layout", $$Layout, { "title": "Contacto" }, { "default": ($$result2) => renderTemplate` ${maybeRenderHead()}<div class="container mx-auto px-4 py-16"> <div class="max-w-2xl mx-auto text-center"> <h1 class="text-4xl font-bold text-neutral-800 mb-4">Contáctanos</h1> <p class="text-neutral-600 mb-12">

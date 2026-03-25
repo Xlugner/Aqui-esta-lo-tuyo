@@ -2,8 +2,8 @@
 import { c as createComponent } from './astro-component_BoJy0tSH.mjs';
 import 'piccolore';
 import { K as renderTemplate, L as maybeRenderHead } from './sequence_BUPkIzlm.mjs';
-import { r as renderComponent } from './entrypoint_DRoMatCi.mjs';
-import { b as addCartItem, i as isCartOpen, $ as $$Layout } from './Layout_CxLreAne.mjs';
+import { r as renderComponent } from './entrypoint_Ba8utNrS.mjs';
+import { b as addCartItem, i as isCartOpen, $ as $$Layout } from './Layout_7XR12vwv.mjs';
 import { q as getProductBySlug, r as getSupabaseImage } from './supabase_BFkBUlFH.mjs';
 import { jsxs, jsx, Fragment } from 'react/jsx-runtime';
 import { useState } from 'react';

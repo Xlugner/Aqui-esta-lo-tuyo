@@ -2,12 +2,12 @@
 import { c as createComponent } from './astro-component_BoJy0tSH.mjs';
 import 'piccolore';
 import { L as maybeRenderHead, a2 as addAttribute, K as renderTemplate, F as Fragment } from './sequence_BUPkIzlm.mjs';
-import { r as renderComponent } from './entrypoint_DRoMatCi.mjs';
-import { $ as $$Layout } from './Layout_CxLreAne.mjs';
+import { r as renderComponent } from './entrypoint_Ba8utNrS.mjs';
+import { $ as $$Layout } from './Layout_7XR12vwv.mjs';
 import 'clsx';
 import { r as renderScript } from './script_8Lc7_j8H.mjs';
 import { h as getHeroSection, r as getSupabaseImage, s as getFeaturedProducts, a as getStoreConfig } from './supabase_BFkBUlFH.mjs';
-import { $ as $$ProductCard } from './ProductCard_2XkH8Qbe.mjs';
+import { $ as $$ProductCard } from './ProductCard_DSQX8Y_M.mjs';
 
 const $$HeroSection = createComponent(async ($$result, $$props, $$slots) => {
   const heroData = await getHeroSection();

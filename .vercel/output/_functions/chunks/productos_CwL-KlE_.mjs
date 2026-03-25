@@ -2,11 +2,11 @@
 import { c as createComponent } from './astro-component_BoJy0tSH.mjs';
 import 'piccolore';
 import { L as maybeRenderHead, a2 as addAttribute, K as renderTemplate } from './sequence_BUPkIzlm.mjs';
-import { r as renderComponent } from './entrypoint_DRoMatCi.mjs';
+import { r as renderComponent } from './entrypoint_Ba8utNrS.mjs';
 import { r as renderScript } from './script_8Lc7_j8H.mjs';
-import { $ as $$Layout } from './Layout_CxLreAne.mjs';
+import { $ as $$Layout } from './Layout_7XR12vwv.mjs';
 import { o as getProducts, g as getCategories } from './supabase_BFkBUlFH.mjs';
-import { $ as $$ProductCard } from './ProductCard_2XkH8Qbe.mjs';
+import { $ as $$ProductCard } from './ProductCard_DSQX8Y_M.mjs';
 import 'clsx';
 import { $ as $$BackButton } from './BackButton_BPI-X1u_.mjs';
 

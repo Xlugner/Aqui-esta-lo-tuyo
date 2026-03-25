@@ -1,7 +1,7 @@
 import { c as createComponent } from './astro-component_BoJy0tSH.mjs';
 import 'piccolore';
 import { L as maybeRenderHead, a2 as addAttribute, K as renderTemplate, b7 as renderHead, b8 as renderSlot } from './sequence_BUPkIzlm.mjs';
-import { r as renderComponent } from './entrypoint_DRoMatCi.mjs';
+import { r as renderComponent } from './entrypoint_Ba8utNrS.mjs';
 import 'clsx';
 import { a as getStoreConfig, r as getSupabaseImage, s as getFeaturedProducts, g as getCategories, h as getHeroSection } from './supabase_BFkBUlFH.mjs';
 import { r as renderScript } from './script_8Lc7_j8H.mjs';

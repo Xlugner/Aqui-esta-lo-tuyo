@@ -3,7 +3,7 @@ import { c as createComponent } from './astro-component_BoJy0tSH.mjs';
 import 'piccolore';
 import './sequence_BUPkIzlm.mjs';
 import 'clsx';
-import { a as signOutAdmin } from './admin-auth_CO7OFhP7.mjs';
+import { a as signOutAdmin } from './admin-auth_HFCdXdjY.mjs';
 
 const $$Logout = createComponent(async ($$result, $$props, $$slots) => {
   const Astro2 = $$result.createAstro($$props, $$slots);
