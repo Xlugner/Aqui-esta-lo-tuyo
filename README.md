@@ -4,15 +4,17 @@ Frontend moderno para la tienda online, construido con Astro, React, Tailwind CS
 
 ## 🎨 Características
 
-- 🚀 Renderizado estático con Astro para máximo rendimiento
+- 🚀 Renderizado híbrido con Astro (SSR + estático)
 - ⚛️ Componentes interactivos con React
-- 🎨 Estilos con Tailwind CSS
-- 🛒 Carrito de compras funcional
+- 🎨 Estilos con Tailwind CSS v4
+- 🛒 Carrito de compras funcional con estado persistente
 - 📱 Diseño totalmente responsive
 - ⚡ Optimizado para rendimiento
-- 🔐 Autenticación con Supabase
-- 🗄️ Base de datos PostgreSQL con Supabase
+- 🔐 Autenticación de usuarios con Supabase
+- � Panel de administración seguro
+- �🗄️ Base de datos PostgreSQL con Supabase
 - 🔍 SEO optimizado
+- 📤 Subida de imágenes con Supabase Storage
 
 ## 🛠️ Requisitos
 
@@ -24,16 +26,14 @@ Frontend moderno para la tienda online, construido con Astro, React, Tailwind CS
 
 1. Clonar el repositorio:
    ```bash
-   git clone https://github.com/tu-usuario/tienda-online-frontend.git
-   cd tienda-online-frontend
+   git clone https://github.com/Xlugner/Aqui-esta-lo-tuyo.git
+   cd Aqui-esta-lo-tuyo
    ```
-
 
 2. Instalar dependencias:
    ```bash
    npm install
    ```
-
 
 3. Configurar variables de entorno:
    ```bash
@@ -47,26 +47,26 @@ Frontend moderno para la tienda online, construido con Astro, React, Tailwind CS
    npm run dev
    ```
 
-
 La aplicación estará disponible en: [http://localhost:4321](http://localhost:4321)
 
 ## 🏗️ Estructura del proyecto
 
 ```text
 src/
-├── components/     # Componentes reutilizables
-│   ├── astro/     # Componentes de Astro
-│   └── react/     # Componentes de React
-├── layouts/       # Layouts de la aplicación
-├── pages/         # Rutas de la aplicación
-│   ├── index.astro # Página de inicio
-│   ├── productos/ # Páginas de productos
-│   ├── carrito/   # Página del carrito
-│   └── cuenta/    # Páginas de autenticación
-├── styles/        # Estilos globales
-└── lib/           # Utilidades y configuraciones
+├── components/          # Componentes reutilizables
+│   ├── astro/           # Componentes de Astro
+│   ├── react/           # Componentes de React
+│   └── admin/           # Componentes del panel admin
+├── layouts/            # Layouts de la aplicación
+├── pages/              # Rutas de la aplicación
+│   ├── index.astro     # Página de inicio
+│   ├── productos/      # Páginas de productos
+│   ├── checkout/       # Página de pago
+│   ├── contacto/        # Página de contacto
+│   └── admin/          # Panel de administración
+├── styles/             # Estilos globales
+└── lib/                # Utilidades y configuraciones
 ```
-
 
 ## 🔧 Variables de entorno
 
@@ -76,13 +76,19 @@ Crea un archivo `.env` en la raíz del proyecto:
 # Configuración de Supabase
 PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
 PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
+SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
 
 # Configuraciones de la tienda
-SITE_NAME="Mi Tienda Online"
-DEFAULT_LANGUAGE=es
+PUBLIC_STORE_NAME="Mi Tienda Online"
+PUBLIC_STORE_DESCRIPTION="Tu tienda online"
 PUBLIC_STORE_EMAIL=contacto@mitienda.com
 PUBLIC_STORE_PHONE=34123456789
+PUBLIC_STORE_LOCATION="Tu ciudad"
 PUBLIC_WHATSAPP_NUMBER=34123456789
+
+# Credenciales admin (solo para desarrollo)
+ADMIN_EMAIL=admin@mitienda.com
+ADMIN_PASSWORD=tu-contraseña
 ```
 
 ## 🚀 Comandos útiles
@@ -93,111 +99,85 @@ PUBLIC_WHATSAPP_NUMBER=34123456789
 | `npm run dev`     | Iniciar servidor de desarrollo             |
 | `npm run build`   | Construir para producción                 |
 | `npm run preview` | Vista previa de la compilación            |
-| `npm run format`  | Formatear código                          |
 
 ## 🛠️ Tecnologías utilizadas
 
-- [Astro](https://astro.build/) - Framework web para sitios estáticos rápidos
-- [React](https://reactjs.org/) - Biblioteca para interfaces de usuario
-- [Tailwind CSS](https://tailwindcss.com/) - Framework CSS utilitario
+- [Astro](https://astro.build/) - Framework web v6
+- [React](https://reactjs.org/) - Biblioteca para interfaces de usuario v18
+- [Tailwind CSS](https://tailwindcss.com/) - Framework CSS utilitario v4
 - [TypeScript](https://www.typescriptlang.org/) - JavaScript tipado
 - [Supabase](https://supabase.com/) - Backend as a Service con PostgreSQL
+- [Netlify](https://www.netlify.com/) - Plataforma de despliegue
 
 ## 🌐 Despliegue
 
-Puedes desplegar en:
+### Netlify (Recomendado)
 
-- [Vercel](https://vercel.com/)
-- [Netlify](https://www.netlify.com/)
-- [Cloudflare Pages](https://pages.cloudflare.com/)
-- Cualquier servicio que soporte sitios estáticos
+1. Ve a [Netlify](https://app.netlify.com)
+2. Conecta tu repositorio de GitHub
+3. Configura:
+   - **Build command:** `npm run build`
+   - **Publish directory:** `dist`
+4. Agrega las variables de entorno en Site settings → Environment variables
 
-## 🤝 Contribución
+### Variables de entorno en producción
 
-1. Haz un fork del proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Haz commit de tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Haz push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+En Netlify, configura estas variables:
+- `PUBLIC_SUPABASE_URL`
+- `PUBLIC_SUPABASE_ANON_KEY` 
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `PUBLIC_STORE_NAME`
+- `PUBLIC_STORE_DESCRIPTION`
+- `PUBLIC_STORE_EMAIL`
+- `PUBLIC_STORE_PHONE`
+- `PUBLIC_STORE_LOCATION`
+- `PUBLIC_WHATSAPP_NUMBER`
 
-## 📄 Licencia
+## 🗄️ Base de datos Supabase
 
-Distribuido bajo la licencia MIT. Ver `LICENSE` para más información.
+El proyecto requiere estas tablas en Supabase:
 
-## ✉️ Contacto
+### Tablas principales
+- `products` - Productos
+- `categories` - Categorías
+- `product_images` - Imágenes de productos
+- `hero_images` - Imágenes del banner principal
+- `store_config` - Configuración de la tienda
 
-Tu Nombre - [@tuusuario](https://t.me/Rzoux) - email@ejemplo.com
+### Autenticación
+- Configurar email/password en Authentication → Settings
+- Habilitar confirmación de email si es necesario
 
-Enlace al proyecto: [Repositorio Frontend](https://github.com/tu-usuario/tienda-online-frontend)
-
-## 📁 Estructura del Proyecto
+## � Estructura actualizada
 
 ```
-├── backend/
-│   ├── config/          # Configuración de Strapi
-│   ├── database/        # Migraciones
-│   ├── public/          # Archivos públicos (uploads)
-│   ├── src/
-│   │   ├── admin/       # Admin panel
-│   │   ├── api/         # Endpoints de API
-│   │   │   ├── category/
-│   │   │   ├── product/
-│   │   │   └── store-config/
-│   │   └── extensions/  # Extensiones personalizadas
-│   └── package.json
-│
 └── frontend/
     ├── src/
-    │   ├── components/  # Componentes Astro y React
-    │   ├── layouts/     # Layouts principales
-    │   ├── pages/       # Rutas y páginas
-    │   ├── lib/         # Utilidades (cliente Strapi, tipos)
-    │   └── styles/      # Estilos globales
-    ├── public/          # Assets estáticos
-    ├── astro.config.mjs
-    └── package.json
+    │   ├── components/
+    │   │   ├── astro/      # Componentes estáticos
+    │   │   ├── react/      # Componentes interactivos
+    │   │   └── admin/      # Panel administración
+    │   ├── layouts/        # Layouts principales
+    │   ├── pages/          # Rutas y páginas
+    │   │   ├── admin/      # Panel admin
+    │   │   ├── productos/  # Detalles de productos
+    │   │   └── ...
+    │   ├── lib/            # Utilidades (cliente Supabase, tipos)
+    │   ├── styles/         # Estilos globales
+    │   └── env.d.ts        # Tipos de variables de entorno
+    ├── public/             # Assets estáticos
+    ├── astro.config.mjs    # Configuración de Astro
+    └── package.json       # Dependencias
 ```
 
-## 🔧 Configuración
+## �️ Panel de Administración
 
-### Frontend (.env)
-
-```env
-PUBLIC_STRAPI_URL=http://localhost:1337
-PUBLIC_WHATSAPP_NUMBER=34123456789
-PUBLIC_STORE_NAME=Mi Tienda Online
-PUBLIC_STORE_DESCRIPTION=Descripción de tu tienda
-PUBLIC_STORE_EMAIL=contacto@mitienda.com
-```
-
-## 📚 Stack Tecnológico
-
-### Backend
-
-- Strapi v5
-- SQLite (por defecto)
-- Node.js
-
-### Frontend
-
-- Astro v5
-- React v18
-- Tailwind CSS v3
-- TypeScript v5
-
-## 🛠️ Scripts útiles
-
-### Backend
-
-- `npm run develop` - Inicia modo desarrollo
-- `npm run build` - Compila para producción
-- `npm run start` - Inicia servidor en producción
-
-### Frontend
-
-- `npm run dev` - Inicia servidor de desarrollo
-- `npm run build` - Construye para producción
-- `npm run preview` - Vista previa de producción
+Acceso seguro a través de `/admin/login` con:
+- Gestión de productos
+- Gestión de categorías  
+- Configuración de banners
+- Configuración de la tienda
+- Subida de imágenes
 
 ## 📝 Licencia
 
