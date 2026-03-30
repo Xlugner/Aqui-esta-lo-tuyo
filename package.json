@@ -2,10 +2,11 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "start": "node dist/server/entry.mjs"
   },
   "dependencies": {
-    "@astrojs/netlify": "latest",
+    "@astrojs/node": "latest",
     "@astrojs/react": "^5.0.1",
     "@nanostores/react": "^1.0.0",
     "@supabase/supabase-js": "^2.94.0",
