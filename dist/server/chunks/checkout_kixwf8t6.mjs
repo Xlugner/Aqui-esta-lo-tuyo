@@ -1,8 +1,8 @@
 import { c as createComponent } from './astro-component_D3Ic-nKB.mjs';
 import 'piccolore';
 import { Q as renderTemplate, B as maybeRenderHead } from './sequence_B6kYL9KL.mjs';
-import { r as renderComponent } from './server_DPkCpYQ_.mjs';
-import { c as cartItems, t as totalsByCurrency, a as clearCart, $ as $$Layout } from './Layout_Bt2dcZdk.mjs';
+import { r as renderComponent } from './server_Dp61SpIq.mjs';
+import { c as cartItems, t as totalsByCurrency, a as clearCart, $ as $$Layout } from './Layout_4Mlt5I1h.mjs';
 import { jsxs, jsx, Fragment } from 'react/jsx-runtime';
 import { useState, useEffect } from 'react';
 import { a as getStoreConfig } from './supabase_XKs3TGPF.mjs';

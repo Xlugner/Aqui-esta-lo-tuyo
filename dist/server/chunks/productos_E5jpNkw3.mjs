@@ -1,11 +1,11 @@
 import { c as createComponent } from './astro-component_D3Ic-nKB.mjs';
 import 'piccolore';
 import { B as maybeRenderHead, a3 as addAttribute, Q as renderTemplate } from './sequence_B6kYL9KL.mjs';
-import { r as renderComponent } from './server_DPkCpYQ_.mjs';
+import { r as renderComponent } from './server_Dp61SpIq.mjs';
 import { r as renderScript } from './script_BRfdXIpO.mjs';
-import { $ as $$Layout } from './Layout_Bt2dcZdk.mjs';
+import { $ as $$Layout } from './Layout_4Mlt5I1h.mjs';
 import { o as getProducts, g as getCategories } from './supabase_XKs3TGPF.mjs';
-import { $ as $$ProductCard } from './ProductCard_4uYZpIGY.mjs';
+import { $ as $$ProductCard } from './ProductCard_L_WSvtjG.mjs';
 import 'clsx';
 import { $ as $$BackButton } from './BackButton_CushLmfn.mjs';
 

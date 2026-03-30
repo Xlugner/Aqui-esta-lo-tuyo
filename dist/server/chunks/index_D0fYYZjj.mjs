@@ -1,7 +1,7 @@
 import { c as createComponent } from './astro-component_D3Ic-nKB.mjs';
 import 'piccolore';
 import { Q as renderTemplate, B as maybeRenderHead } from './sequence_B6kYL9KL.mjs';
-import { r as renderComponent } from './server_DPkCpYQ_.mjs';
+import { r as renderComponent } from './server_Dp61SpIq.mjs';
 import { $ as $$AdminLayout } from './AdminLayout_DPWEJSQA.mjs';
 import { g as getSupabaseServer, b as getCurrentAdmin, c as changePassword } from './admin-auth_HFCdXdjY.mjs';
 

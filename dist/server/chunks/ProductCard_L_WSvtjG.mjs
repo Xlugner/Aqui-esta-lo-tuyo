@@ -1,11 +1,11 @@
 import { c as createComponent } from './astro-component_D3Ic-nKB.mjs';
 import 'piccolore';
 import { B as maybeRenderHead, a3 as addAttribute, Q as renderTemplate } from './sequence_B6kYL9KL.mjs';
-import { r as renderComponent } from './server_DPkCpYQ_.mjs';
+import { r as renderComponent } from './server_Dp61SpIq.mjs';
 import { q as getSupabaseImage } from './supabase_XKs3TGPF.mjs';
 import { jsx, jsxs } from 'react/jsx-runtime';
 import { useState, useEffect } from 'react';
-import { b as addCartItem, i as isCartOpen } from './Layout_Bt2dcZdk.mjs';
+import { b as addCartItem, i as isCartOpen } from './Layout_4Mlt5I1h.mjs';
 
 const AddToCartButton = ({ product }) => {
   const [isAdded, setIsAdded] = useState(false);
