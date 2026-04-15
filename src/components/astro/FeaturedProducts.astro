@@ -35,9 +35,9 @@ const featuredProducts = await getFeaturedProducts();
             id="featured-scroll"
             class="overflow-x-auto scrollbar-hide pb-4 md:px-12"
           >
-            <div class="flex gap-6 min-w-min">
+            <div class="flex gap-4 md:gap-6 min-w-max px-2 md:px-0">
               {featuredProducts.map((product: any) => (
-                <div class="flex-none w-[280px] sm:w-[300px] carousel-item">
+                <div class="flex-none w-[85vw] sm:w-[280px] md:w-[300px] carousel-item max-w-[300px]">
                   <ProductCard product={product} />
                 </div>
               ))}
@@ -130,7 +130,20 @@ const featuredProducts = await getFeaturedProducts();
     if (!scrollContainer) return;
 
     const items = scrollContainer.querySelectorAll(".carousel-item");
-    const itemWidth = 300 + 24; // ancho + gap
+    
+    // Calcular ancho dinámico según el viewport actual
+    function getItemWidth(): number {
+      const firstItem = items[0] as HTMLElement;
+      if (firstItem) {
+        return firstItem.offsetWidth + 24; // ancho + gap
+      }
+      // Fallback según viewport
+      if (window.innerWidth < 640) {
+        return window.innerWidth * 0.85 + 16; // 85vw + gap
+      }
+      return 324; // 300px + gap
+    }
+    
     let currentIndex = 0;
     let autoScrollInterval: number;
 
@@ -160,33 +173,36 @@ const featuredProducts = await getFeaturedProducts();
     }
 
     function scrollToIndex(index: number) {
+      const width = getItemWidth();
       currentIndex = Math.max(0, Math.min(index, items.length - 1));
       scrollContainer.scrollTo({
-        left: currentIndex * itemWidth,
+        left: currentIndex * width,
         behavior: "smooth"
       });
       updateIndicators();
     }
 
     function nextSlide() {
+      const width = getItemWidth();
       const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
       if (scrollContainer.scrollLeft >= maxScroll - 10) {
         scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
         currentIndex = 0;
       } else {
         currentIndex = Math.min(currentIndex + 1, items.length - 1);
-        scrollContainer.scrollBy({ left: itemWidth, behavior: "smooth" });
+        scrollContainer.scrollBy({ left: width, behavior: "smooth" });
       }
       updateIndicators();
     }
 
     function prevSlide() {
+      const width = getItemWidth();
       if (scrollContainer.scrollLeft <= 0) {
-        scrollContainer.scrollTo({ left: items.length * itemWidth, behavior: "smooth" });
+        scrollContainer.scrollTo({ left: items.length * width, behavior: "smooth" });
         currentIndex = items.length - 1;
       } else {
         currentIndex = Math.max(currentIndex - 1, 0);
-        scrollContainer.scrollBy({ left: -itemWidth, behavior: "smooth" });
+        scrollContainer.scrollBy({ left: -width, behavior: "smooth" });
       }
       updateIndicators();
     }
@@ -221,7 +237,8 @@ const featuredProducts = await getFeaturedProducts();
 
     // Detectar scroll manual
     scrollContainer.addEventListener("scroll", () => {
-      const newIndex = Math.round(scrollContainer.scrollLeft / itemWidth);
+      const width = getItemWidth();
+      const newIndex = Math.round(scrollContainer.scrollLeft / width);
       if (newIndex !== currentIndex) {
         currentIndex = newIndex;
         updateIndicators();
