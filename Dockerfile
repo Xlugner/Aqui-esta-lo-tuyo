@@ -22,13 +22,14 @@ WORKDIR /app
 
 # Copiar solo lo necesario del build anterior
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/server.mjs ./
 COPY --from=builder /app/package.json ./
 
 # Instalar dependencias de producción solamente
 RUN npm ci --only=production
 
-# Exponer puerto (Astro usa 3000 por defecto)
+# Exponer puerto (Render y otros hosting asignan $PORT dinámicamente)
 EXPOSE 3000
 
-# Comando para ejecutar la app
-CMD ["npm", "run", "preview"]
+# Comando para ejecutar la app en producción
+CMD ["node", "server.mjs"]

@@ -79,8 +79,7 @@ export interface HeroSection {
  */
 export async function getProducts(supabaseClient?: any): Promise<Product[]> {
   const client = supabaseClient || supabase;
-  console.log('=== DEBUG: getProducts called ===');
-  
+
   // Primero obtener productos
   const { data: productsData, error: productsError } = await client
     .from('products')
@@ -91,35 +90,27 @@ export async function getProducts(supabaseClient?: any): Promise<Product[]> {
     .order('created_at', { ascending: false });
 
   if (productsError) {
-    console.error('Error fetching products:', productsError);
+    console.error('Error fetching products:', productsError.message);
     return [];
   }
-
-  console.log('Products fetched:', productsData?.length);
 
   // Luego obtener todas las imágenes
   const { data: imagesData, error: imagesError } = await client
     .from('product_images')
     .select('*');
 
-  console.log('Images query error:', imagesError);
-  console.log('Images fetched:', imagesData?.length);
-
   if (imagesError) {
-    console.error('Error fetching product images:', imagesError);
+    console.error('Error fetching product images:', imagesError.message);
   }
 
   // Mapear imágenes a productos
   const productsWithImages = productsData?.map(product => {
     const productImages = imagesData?.filter(img => img.product_id === product.id) || [];
-    console.log(`Product ${product.id} has ${productImages.length} images`);
     return {
       ...product,
       images: productImages
     };
   }) || [];
-
-  console.log('First product with images:', productsWithImages[0]);
 
   return productsWithImages;
 }
@@ -278,25 +269,20 @@ export async function updateProduct(id: string, product: Partial<{
  */
 export async function deleteProduct(id: string, supabaseClient?: any): Promise<boolean> {
   const client = supabaseClient || supabase;
-  console.log('=== DEBUG: deleteProduct ===');
-  console.log('Product ID:', id);
-  console.log('Client type:', supabaseClient ? 'authenticated' : 'default');
-  
+
   // Primero eliminar las imágenes del producto
   await deleteProductImages(id, client);
-  
+
   const { error } = await client
     .from('products')
     .delete()
     .eq('id', id);
 
   if (error) {
-    console.error('Error deleting product:', error);
-    console.error('Error details:', { message: error.message, status: error.status });
+    console.error('Error deleting product:', error.message);
     return false;
   }
 
-  console.log('Product deleted successfully');
   return true;
 }
 
@@ -311,10 +297,7 @@ export async function addProductImages(
   supabaseClient?: any
 ): Promise<boolean> {
   const client = supabaseClient || supabase;
-  console.log('=== DEBUG: addProductImages ===');
-  console.log('Product ID:', productId);
-  console.log('Images to insert:', images);
-  
+
   const { data, error } = await client
     .from('product_images')
     .insert(
@@ -326,10 +309,8 @@ export async function addProductImages(
       }))
     );
 
-  console.log('Resultado insert:', { data, error });
-
   if (error) {
-    console.error('Error adding product images:', error);
+    console.error('Error adding product images:', error.message);
     return false;
   }
 
@@ -439,9 +420,7 @@ export async function createCategory(category: {
   description?: string;
 }, supabaseClient?: any): Promise<Category | null> {
   const client = supabaseClient || supabase;
-  
-  console.log('🔍 Creating category:', category);
-  
+
   const { data, error } = await client
     .from('categories')
     .insert(category)
@@ -449,11 +428,10 @@ export async function createCategory(category: {
     .single();
 
   if (error) {
-    console.error('❌ Error creating category:', error);
+    console.error('Error creating category:', error.message);
     return null;
   }
 
-  console.log('✅ Category created:', data);
   return data;
 }
 
@@ -466,9 +444,7 @@ export async function updateCategory(id: string, category: Partial<{
   description: string;
 }>, supabaseClient?: any): Promise<Category | null> {
   const client = supabaseClient || supabase;
-  
-  console.log('🔍 Updating category:', id, category);
-  
+
   const { data, error } = await client
     .from('categories')
     .update(category)
@@ -477,11 +453,10 @@ export async function updateCategory(id: string, category: Partial<{
     .single();
 
   if (error) {
-    console.error('❌ Error updating category:', error);
+    console.error('Error updating category:', error.message);
     return null;
   }
 
-  console.log('✅ Category updated:', data);
   return data;
 }
 
@@ -490,20 +465,17 @@ export async function updateCategory(id: string, category: Partial<{
  */
 export async function deleteCategory(id: string, supabaseClient?: any): Promise<boolean> {
   const client = supabaseClient || supabase;
-  
-  console.log('🔍 Deleting category:', id);
-  
+
   const { error } = await client
     .from('categories')
     .delete()
     .eq('id', id);
 
   if (error) {
-    console.error('❌ Error deleting category:', error);
+    console.error('Error deleting category:', error.message);
     return false;
   }
 
-  console.log('✅ Category deleted');
   return true;
 }
 
@@ -531,9 +503,7 @@ export async function getStoreConfig(): Promise<StoreConfig | null> {
  */
 export async function updateStoreConfig(config: Partial<StoreConfig>, supabaseClient?: any): Promise<StoreConfig | null> {
   const client = supabaseClient || supabase;
-  
-  console.log('🔍 Updating store config:', config);
-  
+
   const { data, error } = await client
     .from('store_config')
     .upsert(config)
@@ -541,11 +511,10 @@ export async function updateStoreConfig(config: Partial<StoreConfig>, supabaseCl
     .single();
 
   if (error) {
-    console.error('❌ Error updating store config:', error);
+    console.error('Error updating store config:', error.message);
     return null;
   }
 
-  console.log('✅ Store config updated:', data);
   return data;
 }
 
@@ -583,27 +552,19 @@ export async function updateHeroSection(
   supabaseClient?: any
 ): Promise<HeroImage[]> {
   const client = supabaseClient || supabase;
-  
-  console.log('=== DEBUG: updateHeroSection ===');
-  console.log('Images to save:', images);
-  console.log('Client type:', supabaseClient ? 'authenticated' : 'default');
-  
+
   try {
     // Primero eliminar todas las imágenes existentes
-    console.log('Eliminando imágenes existentes...');
     const { error: deleteError } = await client
       .from('hero_images')
       .delete()
       .neq('id', '00000000-0000-0000-0000-000000000000');
-    
+
     if (deleteError) {
-      console.error('Error deleting existing images:', deleteError);
-    } else {
-      console.log('Imágenes existentes eliminadas');
+      console.error('Error deleting existing images:', deleteError.message);
     }
 
     // Insertar las nuevas imágenes
-    console.log('Insertando nuevas imágenes...');
     const { data, error } = await client
       .from('hero_images')
       .insert(images.map(img => ({
@@ -614,14 +575,11 @@ export async function updateHeroSection(
       })))
       .select();
 
-    console.log('Insert result:', { data, error });
-
     if (error) {
-      console.error('Error updating hero section:', error);
+      console.error('Error updating hero section:', error.message);
       return [];
     }
 
-    console.log('Hero section updated successfully, images count:', data?.length);
     return data || [];
   } catch (err) {
     console.error('Unexpected error in updateHeroSection:', err);
@@ -652,12 +610,7 @@ export async function uploadFile(
   supabaseClient?: any
 ): Promise<string | null> {
   const client = supabaseClient || supabase;
-  console.log('=== DEBUG: uploadFile ===');
-  console.log('Bucket:', bucket);
-  console.log('Path:', path);
-  console.log('File:', { name: file.name, size: file.size, type: file.type });
-  console.log('Client type:', supabaseClient ? 'authenticated' : 'default');
-  
+
   try {
     const { data, error } = await client.storage
       .from(bucket)
@@ -666,15 +619,11 @@ export async function uploadFile(
         upsert: true
       });
 
-    console.log('Resultado upload:', { data, error });
-
     if (error) {
-      console.error('Error uploading file:', error);
-      console.error('Error details:', { message: error.message, status: error.status });
+      console.error('Error uploading file:', error.message);
       return null;
     }
 
-    console.log('File uploaded successfully, path:', data.path);
     return data.path;
   } catch (err) {
     console.error('Exception in uploadFile:', err);

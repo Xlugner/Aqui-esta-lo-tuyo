@@ -43,10 +43,8 @@ export interface AdminUser {
 export async function checkIsAdmin(supabase: ReturnType<typeof getSupabaseServer>): Promise<boolean> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    console.log('🔍 Current user:', user);
-    
+
     if (!user) {
-      console.log('❌ No user found');
       return false;
     }
 
@@ -57,14 +55,13 @@ export async function checkIsAdmin(supabase: ReturnType<typeof getSupabaseServer
       .single();
 
     if (error) {
-      console.error('❌ Error checking admin status:', error);
+      console.error('Error checking admin status:', error.message);
       return false;
     }
 
-    console.log('👤 Admin user found:', adminUser);
     return !!adminUser;
   } catch (error) {
-    console.error('❌ Exception in checkIsAdmin:', error);
+    console.error('Exception in checkIsAdmin:', error);
     return false;
   }
 }
@@ -72,10 +69,8 @@ export async function checkIsAdmin(supabase: ReturnType<typeof getSupabaseServer
 // Obtener el usuario admin actual
 export async function getCurrentAdmin(supabase: ReturnType<typeof getSupabaseServer>): Promise<AdminUser | null> {
   const { data: { user } } = await supabase.auth.getUser();
-  console.log('🔍 Getting current admin, user:', user);
-  
+
   if (!user) {
-    console.log('❌ No user found in getCurrentAdmin');
     return null;
   }
 
@@ -85,7 +80,6 @@ export async function getCurrentAdmin(supabase: ReturnType<typeof getSupabaseSer
     .eq('id', user.id)
     .single();
 
-  console.log('👤 Admin user data:', adminUser);
   return adminUser;
 }
 
@@ -118,19 +112,21 @@ export async function signInAdmin(
   }
 
   // Guardar sesión en cookies
+  const isProduction = import.meta.env.PROD;
+  
   cookies.set('sb-access-token', data.session.access_token, {
     path: '/',
     httpOnly: true,
-    secure: import.meta.env.PROD,
-    sameSite: 'lax',
+    secure: isProduction, // true en producción (HTTPS)
+    sameSite: isProduction ? 'none' : 'lax', // 'none' en producción para cross-site
     maxAge: 60 * 60 * 24 * 7, // 7 días
   });
 
   cookies.set('sb-refresh-token', data.session.refresh_token, {
     path: '/',
     httpOnly: true,
-    secure: import.meta.env.PROD,
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: 60 * 60 * 24 * 365, // 1 año
   });
 
@@ -170,7 +166,7 @@ export async function verifyAdminSession(cookies: AstroCookies): Promise<boolean
     const supabase = getSupabaseServer(cookies);
     return await checkIsAdmin(supabase);
   } catch (error) {
-    console.error('❌ Error verifying admin session:', error);
+    console.error('Error verifying admin session:', error);
     return false;
   }
 }

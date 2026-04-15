@@ -6,7 +6,17 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     environment:
+      # Configuración de Supabase (requerido)
       - PUBLIC_SUPABASE_URL=${PUBLIC_SUPABASE_URL}
       - PUBLIC_SUPABASE_ANON_KEY=${PUBLIC_SUPABASE_ANON_KEY}
+      # Configuración de la tienda
+      - PUBLIC_STORE_NAME=${PUBLIC_STORE_NAME:-Mi Tienda Online}
+      - PUBLIC_STORE_DESCRIPTION=${PUBLIC_STORE_DESCRIPTION}
+      - PUBLIC_STORE_EMAIL=${PUBLIC_STORE_EMAIL}
+      - PUBLIC_STORE_PHONE=${PUBLIC_STORE_PHONE}
+      - PUBLIC_STORE_LOCATION=${PUBLIC_STORE_LOCATION}
+      - PUBLIC_WHATSAPP_NUMBER=${PUBLIC_WHATSAPP_NUMBER}
+      # Puerto para el servidor
+      - PORT=${PORT:-3000}
