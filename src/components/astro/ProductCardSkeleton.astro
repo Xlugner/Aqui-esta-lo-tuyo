@@ -1,0 +1,65 @@
+---
+/**
+ * COMPONENTE: ProductCardSkeleton
+ * 
+ * Placeholder animado que se muestra mientras cargan los productos
+ * Simula la estructura de una ProductCard real para mejor UX
+ */
+---
+
+<div class="product-card bg-white rounded-lg shadow-sm overflow-hidden animate-pulse">
+  <!-- Skeleton imagen -->
+  <div class="skeleton-image aspect-square bg-neutral-200"></div>
+
+  <!-- Skeleton info -->
+  <div class="p-4 space-y-3">
+    <!-- Skeleton título -->
+    <div class="skeleton-title h-5 bg-neutral-200 rounded w-3/4"></div>
+    <div class="skeleton-title h-5 bg-neutral-200 rounded w-1/2"></div>
+
+    <!-- Skeleton descripción -->
+    <div class="skeleton-description h-4 bg-neutral-200 rounded w-full"></div>
+
+    <!-- Skeleton precio -->
+    <div class="skeleton-price h-8 bg-neutral-200 rounded w-1/3"></div>
+
+    <!-- Skeleton botón -->
+    <div class="skeleton-button h-10 bg-neutral-200 rounded-lg w-full"></div>
+  </div>
+</div>
+
+<style>
+  .skeleton-image {
+    height: 200px;
+  }
+
+  .skeleton-title {
+    border-radius: 4px;
+  }
+
+  .skeleton-description {
+    border-radius: 4px;
+  }
+
+  .skeleton-price {
+    border-radius: 4px;
+  }
+
+  .skeleton-button {
+    border-radius: 8px;
+  }
+
+  /* Animación de pulso para el skeleton */
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+</style>

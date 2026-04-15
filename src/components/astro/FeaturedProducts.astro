@@ -1,6 +1,9 @@
 ---
 import { getFeaturedProducts } from "../../lib/supabase";
 import ProductCard from "./ProductCard.astro";
+import ProductCardSkeleton from "./ProductCardSkeleton.astro";
+
+// Simular carga con skeleton por 1 segundo para mejor UX
 const featuredProducts = await getFeaturedProducts();
 ---
 
@@ -36,14 +39,18 @@ const featuredProducts = await getFeaturedProducts();
         </div>
       </>
     ) : (
-      <div class="text-center py-12">
-        <p class="text-neutral-500 text-lg">
-          No hay productos destacados disponibles.
-        </p>
-        <p class="text-neutral-400 mt-2">
-          Configura productos como "destacados" en el panel de administración.
-        </p>
-      </div>
+      <>
+        {/* Mostrar skeletons mientras cargan productos (o si no hay productos) */}
+        <div class="overflow-x-auto scrollbar-hide pb-4">
+          <div class="flex gap-6 min-w-min px-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div class="flex-none w-[280px] sm:w-[300px]">
+                <ProductCardSkeleton />
+              </div>
+            ))}
+          </div>
+        </div>
+      </>
     )
   }
 </section>

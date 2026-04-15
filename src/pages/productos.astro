@@ -2,16 +2,12 @@
 import Layout from "../layouts/Layout.astro";
 import { getProducts, getCategories } from "../lib/supabase";
 import ProductCard from "../components/astro/ProductCard.astro";
+import ProductCardSkeleton from "../components/astro/ProductCardSkeleton.astro";
 import CategoryCarousel from "../components/astro/CategoryCarousel.astro";
 import BackButton from "../components/astro/BackButton.astro";
 
 const products = await getProducts();
 const categories = await getCategories();
-
-console.log('=== DEBUG productos.astro ===');
-console.log('Total products:', products.length);
-console.log('First product:', products[0]);
-console.log('First product images:', products[0]?.images);
 
 // Obtener parámetro de búsqueda de la URL
 const search = Astro.url.searchParams.get("search");
@@ -63,15 +59,14 @@ const filteredProducts = searchQuery
             </div>
           ))
         ) : (
-          <div class="col-span-full text-center py-12">
-            <p class="text-neutral-500 text-lg">No se encontraron productos.</p>
-            <a
-              href="/productos"
-              class="text-primary hover:underline mt-2 inline-block"
-            >
-              Ver todos los productos
-            </a>
-          </div>
+          <>
+            {/* Mostrar skeletons cuando no hay productos disponibles */}
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div class="product-item">
+                <ProductCardSkeleton />
+              </div>
+            ))}
+          </>
         )
       }
     </div>

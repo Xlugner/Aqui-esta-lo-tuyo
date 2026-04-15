@@ -35,6 +35,9 @@ Thumbs.db
 # Build artifacts
 *.tsbuildinfo
 
+# Astro build output
+dist/
+
 # Database
 *.sqlite
 *.sqlite3

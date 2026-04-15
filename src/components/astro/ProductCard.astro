@@ -14,12 +14,6 @@ const { name, price, currency, slug, description, images } = product;
 const firstImage = images && images.length > 0 ? images[0] : null;
 const imageUrl = getSupabaseImage(firstImage?.image_url);
 
-console.log('=== DEBUG ProductCard ===');
-console.log('Product:', name);
-console.log('Images array:', images);
-console.log('First image:', firstImage);
-console.log('Image URL:', imageUrl);
-
 // Preparar datos para el botón de añadir al carrito
 const cartItem = {
   id: product.id,
@@ -33,12 +27,13 @@ const cartItem = {
 
 <!--
   COMPONENTE: ProductCard (Vertical)
-  
+
   Tarjeta vertical para grid de productos
   Muestra badge "Más Vendido" si está marcado como featured
+  Todas las tarjetas tienen la misma altura para consistencia visual
 -->
 <div
-  class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+  class="product-card bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
 >
   <a href={`/productos/${slug}`} class="block relative">
     <!-- Badge "Más Vendido" -->
@@ -52,8 +47,8 @@ const cartItem = {
       )
     }
 
-    <!-- Imagen del producto -->
-    <div class="aspect-square overflow-hidden bg-neutral-100">
+    <!-- Imagen del producto (altura fija) -->
+    <div class="product-card-image aspect-square overflow-hidden bg-neutral-100">
       <img
         src={imageUrl}
         alt={name}
@@ -63,21 +58,22 @@ const cartItem = {
     </div>
   </a>
 
-  <!-- Información del producto -->
-  <div class="p-4">
+  <!-- Información del producto (altura fija) -->
+  <div class="product-card-info p-4 flex flex-col">
     <a href={`/productos/${slug}`}>
       <h3
         class="text-neutral-800 font-semibold text-sm mb-1 line-clamp-2 hover:text-neutral-700 transition-colors"
+        style="min-height: 2.5rem;"
       >
         {name}
       </h3>
     </a>
 
-    <p class="text-neutral-500 text-xs mb-3 h-6 overflow-hidden">
+    <p class="text-neutral-500 text-xs mb-3 line-clamp-2" style="min-height: 1.5rem;">
       {
         description && description.length > 80
           ? description.substring(0, 70) + "..."
-          : description
+          : description || ""
       }
     </p>
 
@@ -89,8 +85,10 @@ const cartItem = {
       </span>
     </div>
 
-    <!-- Botón de añadir al carrito (React Island) -->
-    <AddToCartButton client:load product={cartItem} />
+    <!-- Botón de añadir al carrito (React Island) - empujado al fondo -->
+    <div class="mt-auto">
+      <AddToCartButton client:load product={cartItem} />
+    </div>
   </div>
 </div>
 
@@ -107,5 +105,15 @@ const cartItem = {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  /* Altura fija para la imagen */
+  .product-card-image {
+    height: 200px;
+  }
+
+  /* Altura mínima fija para la info */
+  .product-card-info {
+    min-height: 160px;
   }
 </style>
