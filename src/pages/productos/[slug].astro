@@ -29,11 +29,6 @@ if (!product) {
   return Astro.redirect("/404");
 }
 
-console.log('=== DEBUG [slug].astro ===');
-console.log('Product slug:', slug);
-console.log('Product:', product);
-console.log('Product images:', product.images);
-
 const { name, description, price, currency, images, category } = product;
 
 // Preparar imágenes para la galería
