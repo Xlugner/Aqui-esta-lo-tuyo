@@ -17,15 +17,47 @@ const featuredProducts = await getFeaturedProducts();
   {
     featuredProducts && featuredProducts.length > 0 ? (
       <>
-        {/* Contenedor con scroll horizontal */}
-        <div class="overflow-x-auto scrollbar-hide pb-4">
-          <div class="flex gap-6 min-w-min px-2">
-            {featuredProducts.map((product: any) => (
-              <div class="flex-none w-[280px] sm:w-[300px]">
-                <ProductCard product={product} />
-              </div>
-            ))}
+        {/* Contenedor del carousel */}
+        <div class="relative">
+          {/* Botón anterior */}
+          <button
+            id="scroll-left"
+            class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg p-3 rounded-full hidden md:flex items-center justify-center transition-all duration-200 hover:scale-110"
+            aria-label="Producto anterior"
+          >
+            <svg class="w-5 h-5 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          {/* Contenedor con scroll horizontal */}
+          <div
+            id="featured-scroll"
+            class="overflow-x-auto scrollbar-hide pb-4 md:px-12"
+          >
+            <div class="flex gap-6 min-w-min">
+              {featuredProducts.map((product: any) => (
+                <div class="flex-none w-[280px] sm:w-[300px] carousel-item">
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Botón siguiente */}
+          <button
+            id="scroll-right"
+            class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg p-3 rounded-full hidden md:flex items-center justify-center transition-all duration-200 hover:scale-110"
+            aria-label="Producto siguiente"
+          >
+            <svg class="w-5 h-5 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Indicadores de posición */}
+        <div class="flex justify-center gap-2 mt-6" id="carousel-indicators">
         </div>
 
         {/* Botón Ver Todos */}
@@ -76,4 +108,124 @@ const featuredProducts = await getFeaturedProducts();
       padding-right: 1.5rem;
     }
   }
+
+  /* Animación de fade in */
+  .carousel-item {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
 </style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const scrollContainer = document.getElementById("featured-scroll");
+    const scrollLeft = document.getElementById("scroll-left");
+    const scrollRight = document.getElementById("scroll-right");
+    const indicators = document.getElementById("carousel-indicators");
+    
+    if (!scrollContainer) return;
+
+    const items = scrollContainer.querySelectorAll(".carousel-item");
+    const itemWidth = 300 + 24; // ancho + gap
+    let currentIndex = 0;
+    let autoScrollInterval: number;
+
+    // Crear indicadores
+    const totalIndicators = Math.min(items.length, 5);
+    for (let i = 0; i < totalIndicators; i++) {
+      const dot = document.createElement("button");
+      dot.className = `w-2 h-2 rounded-full transition-all duration-200 ${i === 0 ? "bg-neutral-800 w-4" : "bg-neutral-300"}`;
+      dot.setAttribute("aria-label", `Ir a producto ${i + 1}`);
+      dot.addEventListener("click", () => scrollToIndex(i));
+      indicators?.appendChild(dot);
+    }
+
+    function updateIndicators() {
+      if (!indicators) return;
+      const dots = indicators.querySelectorAll("button");
+      dots.forEach((dot, i) => {
+        const normalizedIndex = currentIndex % totalIndicators;
+        if (i === normalizedIndex) {
+          dot.classList.remove("bg-neutral-300", "w-2");
+          dot.classList.add("bg-neutral-800", "w-4");
+        } else {
+          dot.classList.remove("bg-neutral-800", "w-4");
+          dot.classList.add("bg-neutral-300", "w-2");
+        }
+      });
+    }
+
+    function scrollToIndex(index: number) {
+      currentIndex = Math.max(0, Math.min(index, items.length - 1));
+      scrollContainer.scrollTo({
+        left: currentIndex * itemWidth,
+        behavior: "smooth"
+      });
+      updateIndicators();
+    }
+
+    function nextSlide() {
+      const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+      if (scrollContainer.scrollLeft >= maxScroll - 10) {
+        scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
+        currentIndex = 0;
+      } else {
+        currentIndex = Math.min(currentIndex + 1, items.length - 1);
+        scrollContainer.scrollBy({ left: itemWidth, behavior: "smooth" });
+      }
+      updateIndicators();
+    }
+
+    function prevSlide() {
+      if (scrollContainer.scrollLeft <= 0) {
+        scrollContainer.scrollTo({ left: items.length * itemWidth, behavior: "smooth" });
+        currentIndex = items.length - 1;
+      } else {
+        currentIndex = Math.max(currentIndex - 1, 0);
+        scrollContainer.scrollBy({ left: -itemWidth, behavior: "smooth" });
+      }
+      updateIndicators();
+    }
+
+    // Auto-scroll cada 4 segundos
+    autoScrollInterval = window.setInterval(nextSlide, 4000);
+
+    // Botones de navegación
+    scrollRight?.addEventListener("click", () => {
+      nextSlide();
+      resetAutoScroll();
+    });
+
+    scrollLeft?.addEventListener("click", () => {
+      prevSlide();
+      resetAutoScroll();
+    });
+
+    // Pausar auto-scroll al hover
+    scrollContainer.addEventListener("mouseenter", () => {
+      clearInterval(autoScrollInterval);
+    });
+
+    scrollContainer.addEventListener("mouseleave", () => {
+      autoScrollInterval = window.setInterval(nextSlide, 4000);
+    });
+
+    function resetAutoScroll() {
+      clearInterval(autoScrollInterval);
+      autoScrollInterval = window.setInterval(nextSlide, 4000);
+    }
+
+    // Detectar scroll manual
+    scrollContainer.addEventListener("scroll", () => {
+      const newIndex = Math.round(scrollContainer.scrollLeft / itemWidth);
+      if (newIndex !== currentIndex) {
+        currentIndex = newIndex;
+        updateIndicators();
+      }
+    });
+  });
+</script>
