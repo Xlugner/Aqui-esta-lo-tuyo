@@ -17,15 +17,51 @@ const featuredProducts = await getFeaturedProducts();
   {
     featuredProducts && featuredProducts.length > 0 ? (
       <>
-        {/* Contenedor con scroll horizontal */}
-        <div class="overflow-x-auto scrollbar-hide pb-4">
-          <div class="flex gap-6 min-w-min px-2">
-            {featuredProducts.map((product: any) => (
-              <div class="flex-none w-[280px] sm:w-[300px]">
-                <ProductCard product={product} />
-              </div>
-            ))}
+        {/* Contenedor del carousel */}
+        <div class="relative">
+          {/* Botón anterior */}
+          <button
+            id="scroll-left"
+            class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg p-3 rounded-full hidden md:flex items-center justify-center transition-all duration-200 hover:scale-110"
+            aria-label="Producto anterior"
+          >
+            <svg class="w-5 h-5 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          {/* Contenedor con scroll horizontal */}
+          <div
+            id="featured-scroll"
+            class="overflow-x-hidden scrollbar-hide pb-4"
+          >
+            <div 
+              id="featured-track"
+              class="flex gap-4 md:gap-6 transition-transform duration-300 ease-out"
+              style="transform: translateX(0)"
+            >
+              {featuredProducts.map((product: any) => (
+                <div class="featured-slide flex-none w-[calc(100vw-2rem)] sm:w-[280px] md:w-[300px] flex-shrink-0">
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Botón siguiente */}
+          <button
+            id="scroll-right"
+            class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg p-3 rounded-full hidden md:flex items-center justify-center transition-all duration-200 hover:scale-110"
+            aria-label="Producto siguiente"
+          >
+            <svg class="w-5 h-5 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Indicadores de posición */}
+        <div class="flex justify-center gap-2 mt-6" id="carousel-indicators">
         </div>
 
         {/* Botón Ver Todos */}
@@ -76,4 +112,161 @@ const featuredProducts = await getFeaturedProducts();
       padding-right: 1.5rem;
     }
   }
+
+  /* Animación de fade in */
+  .carousel-item {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
 </style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const scrollContainer = document.getElementById("featured-scroll");
+    const track = document.getElementById("featured-track");
+    const scrollLeft = document.getElementById("scroll-left");
+    const scrollRight = document.getElementById("scroll-right");
+    const indicators = document.getElementById("carousel-indicators");
+    
+    if (!scrollContainer || !track) return;
+
+    const items = track.querySelectorAll(".featured-slide") as NodeListOf<HTMLElement>;
+    if (items.length === 0) return;
+    
+    let currentIndex = 0;
+    let autoScrollInterval: number;
+
+    // Obtener ancho exacto del slide actual
+    function getSlideWidth(): number {
+      return items[0]?.offsetWidth || window.innerWidth - 32;
+    }
+    
+    // Mover el track con transform
+    function updatePosition() {
+      const width = getSlideWidth();
+      const offset = currentIndex * width;
+      track.style.transform = `translateX(-${offset}px)`;
+    }
+
+    // Crear indicadores dinámicamente
+    function createIndicators() {
+      if (!indicators) return;
+      indicators.innerHTML = "";
+      const totalIndicators = Math.min(items.length, 5);
+      for (let i = 0; i < totalIndicators; i++) {
+        const dot = document.createElement("button");
+        dot.className = `w-2 h-2 rounded-full transition-all duration-200 ${i === 0 ? "bg-neutral-800 w-4" : "bg-neutral-300"}`;
+        dot.setAttribute("aria-label", `Ir a producto ${i + 1}`);
+        dot.addEventListener("click", () => {
+          currentIndex = i;
+          updatePosition();
+          updateIndicators();
+          resetAutoScroll();
+        });
+        indicators.appendChild(dot);
+      }
+    }
+
+    function updateIndicators() {
+      if (!indicators) return;
+      const dots = indicators.querySelectorAll("button");
+      const totalIndicators = Math.min(items.length, 5);
+      dots.forEach((dot, i) => {
+        const normalizedIndex = currentIndex % totalIndicators;
+        if (i === normalizedIndex) {
+          dot.classList.remove("bg-neutral-300", "w-2");
+          dot.classList.add("bg-neutral-800", "w-4");
+        } else {
+          dot.classList.remove("bg-neutral-800", "w-4");
+          dot.classList.add("bg-neutral-300", "w-2");
+        }
+      });
+    }
+
+    function nextSlide() {
+      if (currentIndex >= items.length - 1) {
+        currentIndex = 0;
+      } else {
+        currentIndex++;
+      }
+      updatePosition();
+      updateIndicators();
+    }
+
+    function prevSlide() {
+      if (currentIndex <= 0) {
+        currentIndex = items.length - 1;
+      } else {
+        currentIndex--;
+      }
+      updatePosition();
+      updateIndicators();
+    }
+
+    // Inicializar
+    createIndicators();
+    updatePosition();
+
+    // Auto-scroll cada 4 segundos
+    autoScrollInterval = window.setInterval(nextSlide, 4000);
+
+    // Botones de navegación
+    scrollRight?.addEventListener("click", () => {
+      prevSlide();
+      resetAutoScroll();
+    });
+
+    scrollLeft?.addEventListener("click", () => {
+      prevSlide();
+      resetAutoScroll();
+    });
+
+    // Pausar al hover
+    scrollContainer.addEventListener("mouseenter", () => {
+      clearInterval(autoScrollInterval);
+    });
+
+    scrollContainer.addEventListener("mouseleave", () => {
+      autoScrollInterval = window.setInterval(nextSlide, 4000);
+    });
+
+    function resetAutoScroll() {
+      clearInterval(autoScrollInterval);
+      autoScrollInterval = window.setInterval(nextSlide, 4000);
+    }
+
+    // Reconocer gestos swipe en mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    scrollContainer.addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      clearInterval(autoScrollInterval);
+    }, { passive: true });
+
+    scrollContainer.addEventListener("touchend", (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+      autoScrollInterval = window.setInterval(nextSlide, 4000);
+    }, { passive: true });
+
+    function handleSwipe() {
+      const diff = touchStartX - touchEndX;
+      const threshold = 50;
+      if (diff > threshold) {
+        prevSlide(); // swipe izquierda = siguiente
+      } else if (diff < -threshold) {
+        nextSlide(); // swipe derecha = anterior
+      }
+    }
+
+    // Actualizar posición al redimensionar ventana
+    window.addEventListener("resize", () => {
+      updatePosition();
+    });
+  });
+</script>
