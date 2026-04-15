@@ -20,19 +20,6 @@ interface CartProps {
  */
 export const Cart = ({ isOpen, onClose }: CartProps) => {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [view, setView] = useState('cart'); // 'cart' o 'checkout'
-  const [formData, setFormData] = useState({
-    date: '',
-    time: '',
-    name: '',
-    ci: '',
-    address: '',
-    municipality: '',
-    province: '',
-    reference: '',
-    phone: '',
-    paymentMethod: 'usd',
-  });
 
   useEffect(() => {
     const unsubscribe = cartItems.subscribe((cartData) => {
@@ -41,88 +28,9 @@ export const Cart = ({ isOpen, onClose }: CartProps) => {
     return unsubscribe;
   }, []);
 
-  // 3. Importamos los totales por moneda desde el store
+  // Totales por moneda desde el store
   const totals = totalsByCurrency.get();
   const totalPrice = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-
-  // Generar mensaje de WhatsApp
-  const generateWhatsAppMessage = () => {
-    const WHATSAPP_NUMBER = import.meta.env.PUBLIC_WHATSAPP_NUMBER;
-    const MESSAGE_PREFIX = import.meta.env.PUBLIC_WHATSAPP_MESSAGE_PREFIX || 
-      'Hola! Me gustaría hacer un pedido:';
-
-    let message = `${MESSAGE_PREFIX}\n\n`;
-    
-    items.forEach(item => {
-      message += `• ${item.name} x${item.quantity} - ${(item.price * item.quantity).toLocaleString()} ${item.currency}\n`;
-    });
-    
-    message += `\n*Total: ${totalPrice.toLocaleString()}*`;
-
-    const encodedMessage = encodeURIComponent(message);
-    // Nota: Asegúrate de tener configurado PUBLIC_WHATSAPP_NUMBER en tu .env
-    // Si no, esto abrirá un enlace roto.
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
-    
-    window.open(whatsappUrl, '_blank');
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const CheckoutForm = () => (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
-      <h3 className="text-xl font-bold">Completa tus datos</h3>
-      <div>
-        <label htmlFor="date" className="block text-sm font-medium text-neutral-700">Fecha</label>
-        <input type="date" name="date" id="date" value={formData.date} onChange={handleInputChange} className="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" />
-      </div>
-      <div>
-        <label htmlFor="time" className="block text-sm font-medium text-neutral-700">Hora de entrega</label>
-        <input type="time" name="time" id="time" value={formData.time} onChange={handleInputChange} className="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" />
-      </div>
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-neutral-700">Nombre y apellidos</label>
-        <input type="text" name="name" id="name" value={formData.name} onChange={handleInputChange} className="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" />
-      </div>
-      <div>
-        <label htmlFor="ci" className="block text-sm font-medium text-neutral-700">C.I</label>
-        <input type="text" name="ci" id="ci" value={formData.ci} onChange={handleInputChange} className="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" />
-      </div>
-      <div>
-        <label htmlFor="address" className="block text-sm font-medium text-neutral-700">Dirección</label>
-        <input type="text" name="address" id="address" value={formData.address} onChange={handleInputChange} className="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" />
-      </div>
-      <div>
-        <label htmlFor="municipality" className="block text-sm font-medium text-neutral-700">Municipio</label>
-        <input type="text" name="municipality" id="municipality" value={formData.municipality} onChange={handleInputChange} className="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" />
-      </div>
-      <div>
-        <label htmlFor="province" className="block text-sm font-medium text-neutral-700">Provincia</label>
-        <input type="text" name="province" id="province" value={formData.province} onChange={handleInputChange} className="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" />
-      </div>
-      <div>
-        <label htmlFor="reference" className="block text-sm font-medium text-neutral-700">Puntos de referencia</label>
-        <input type="text" name="reference" id="reference" value={formData.reference} onChange={handleInputChange} className="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" />
-      </div>
-      <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-neutral-700">Número telefónico</label>
-        <input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleInputChange} className="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" />
-      </div>
-      <div>
-        <label htmlFor="paymentMethod" className="block text-sm font-medium text-neutral-700">Tipo de moneda para el proceso de pago</label>
-        <select name="paymentMethod" id="paymentMethod" value={formData.paymentMethod} onChange={handleInputChange} className="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-          <option value="usd">USD</option>
-          <option value="zelle">Zelle</option>
-          <option value="cup">CUP</option>
-          <option value="mixto">Mixto</option>
-        </select>
-      </div>
-      <p className="text-sm text-neutral-500">Nota: Domicilio gratis solo en la cuidad de Bayamo.</p>
-    </div>
-  );
 
   if (!isOpen) return null;
 

@@ -38,7 +38,19 @@ export const CheckoutForm = () => {
   };
 
   const generateWhatsAppMessage = () => {
+    if (items.length === 0) {
+      alert('Tu carrito está vacío');
+      return;
+    }
+
+    // Obtener número de WhatsApp: Supabase config primero, fallback a env
     const WHATSAPP_NUMBER = storeConfig?.whatsapp_number || import.meta.env.PUBLIC_WHATSAPP_NUMBER;
+
+    if (!WHATSAPP_NUMBER) {
+      alert('Error: No se configuró el número de WhatsApp');
+      return;
+    }
+
     let message = `*Nuevo Pedido*\n\n`;
     message += `*Fecha:* ${formData.date}\n`;
     message += `*Hora de entrega:* ${formData.time}\n`;
@@ -54,7 +66,7 @@ export const CheckoutForm = () => {
     items.forEach(item => {
       message += `• ${item.name} x${item.quantity} - $${(item.price * item.quantity).toLocaleString()} ${item.currency}\n`;
     });
-    
+
     // Agregar resumen por moneda
     if (totals.CUP > 0 || totals.USD > 0) {
       message += `\n*Resumen por moneda:*\n`;
@@ -65,13 +77,13 @@ export const CheckoutForm = () => {
         message += `• Total USD: $${totals.USD.toLocaleString()} USD\n`;
       }
     }
-    
+
     message += `\n*Total General: $${totalPrice.toLocaleString()}*\n\n`;
     message += `_Nota: Domicilio gratis solo en la ciudad de Bayamo._`;
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
-    
+
     window.open(whatsappUrl, '_blank');
     clearCart();
   };
@@ -129,8 +141,8 @@ export const CheckoutForm = () => {
             <option value="mixto">Mixto</option>
           </select>
         </div>
-        <p className="text-sm text-neutral-500">Nota: Domicilio gratis solo en la cuidad de Bayamo.</p>
-        <button onClick={generateWhatsAppMessage} type="submit" className="w-full bg-neutral-900 hover:bg-neutral-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+        <p className="text-sm text-neutral-500">Nota: Domicilio gratis solo en la ciudad de Bayamo.</p>
+        <button type="submit" className="w-full bg-neutral-900 hover:bg-neutral-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
           Confirmar y Enviar Pedido
         </button>
       </form>
