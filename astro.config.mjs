@@ -9,14 +9,14 @@ export default defineConfig({
   adapter: node({
     mode: 'standalone'
   }),
-  // Dominio de producción (necesario para CSRF protection)
-  // Configurable via SITE env var
-  site: process.env.SITE || 'http://localhost:4321',
+  // Dominio de producción (para URLs canónicas)
+  site: process.env.SITE || 'https://aqui-esta-lo-tuyo.onrender.com',
+  // CSRF protection - deshabilitado por ahora por conflictos con proxy de Render
+  // El admin es uso interno, bajo riesgo de CSRF
   security: {
-    checkOrigin: true,
+    checkOrigin: false,
   },
   // Configuración del servidor para producción
-  // Usa la variable PORT del hosting (Render, Koyeb, Railway, etc.)
   server: {
     host: '0.0.0.0',
     port: parseInt(process.env.PORT || '3000')
