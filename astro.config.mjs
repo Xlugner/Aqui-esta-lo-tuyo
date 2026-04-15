@@ -9,6 +9,12 @@ export default defineConfig({
   adapter: node({
     mode: 'standalone'
   }),
+  // Dominio de producción (necesario para CSRF protection)
+  // Configurable via SITE env var
+  site: process.env.SITE || 'http://localhost:4321',
+  security: {
+    checkOrigin: true,
+  },
   // Configuración del servidor para producción
   // Usa la variable PORT del hosting (Render, Koyeb, Railway, etc.)
   server: {
