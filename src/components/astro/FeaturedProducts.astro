@@ -33,11 +33,15 @@ const featuredProducts = await getFeaturedProducts();
           {/* Contenedor con scroll horizontal */}
           <div
             id="featured-scroll"
-            class="overflow-x-auto scrollbar-hide pb-4 md:px-12"
+            class="overflow-x-hidden scrollbar-hide pb-4"
           >
-            <div class="flex gap-4 md:gap-6 min-w-max px-2 md:px-0">
+            <div 
+              id="featured-track"
+              class="flex gap-4 md:gap-6 transition-transform duration-300 ease-out"
+              style="transform: translateX(0)"
+            >
               {featuredProducts.map((product: any) => (
-                <div class="flex-none w-[85vw] sm:w-[280px] md:w-[300px] carousel-item max-w-[300px]">
+                <div class="featured-slide flex-none w-[calc(100vw-2rem)] sm:w-[280px] md:w-[300px] flex-shrink-0">
                   <ProductCard product={product} />
                 </div>
               ))}
@@ -123,43 +127,54 @@ const featuredProducts = await getFeaturedProducts();
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const scrollContainer = document.getElementById("featured-scroll");
+    const track = document.getElementById("featured-track");
     const scrollLeft = document.getElementById("scroll-left");
     const scrollRight = document.getElementById("scroll-right");
     const indicators = document.getElementById("carousel-indicators");
     
-    if (!scrollContainer) return;
+    if (!scrollContainer || !track) return;
 
-    const items = scrollContainer.querySelectorAll(".carousel-item");
-    
-    // Calcular ancho dinámico según el viewport actual
-    function getItemWidth(): number {
-      const firstItem = items[0] as HTMLElement;
-      if (firstItem) {
-        return firstItem.offsetWidth + 24; // ancho + gap
-      }
-      // Fallback según viewport
-      if (window.innerWidth < 640) {
-        return window.innerWidth * 0.85 + 16; // 85vw + gap
-      }
-      return 324; // 300px + gap
-    }
+    const items = track.querySelectorAll(".featured-slide") as NodeListOf<HTMLElement>;
+    if (items.length === 0) return;
     
     let currentIndex = 0;
     let autoScrollInterval: number;
 
-    // Crear indicadores
-    const totalIndicators = Math.min(items.length, 5);
-    for (let i = 0; i < totalIndicators; i++) {
-      const dot = document.createElement("button");
-      dot.className = `w-2 h-2 rounded-full transition-all duration-200 ${i === 0 ? "bg-neutral-800 w-4" : "bg-neutral-300"}`;
-      dot.setAttribute("aria-label", `Ir a producto ${i + 1}`);
-      dot.addEventListener("click", () => scrollToIndex(i));
-      indicators?.appendChild(dot);
+    // Obtener ancho exacto del slide actual
+    function getSlideWidth(): number {
+      return items[0]?.offsetWidth || window.innerWidth - 32;
+    }
+    
+    // Mover el track con transform
+    function updatePosition() {
+      const width = getSlideWidth();
+      const offset = currentIndex * width;
+      track.style.transform = `translateX(-${offset}px)`;
+    }
+
+    // Crear indicadores dinámicamente
+    function createIndicators() {
+      if (!indicators) return;
+      indicators.innerHTML = "";
+      const totalIndicators = Math.min(items.length, 5);
+      for (let i = 0; i < totalIndicators; i++) {
+        const dot = document.createElement("button");
+        dot.className = `w-2 h-2 rounded-full transition-all duration-200 ${i === 0 ? "bg-neutral-800 w-4" : "bg-neutral-300"}`;
+        dot.setAttribute("aria-label", `Ir a producto ${i + 1}`);
+        dot.addEventListener("click", () => {
+          currentIndex = i;
+          updatePosition();
+          updateIndicators();
+          resetAutoScroll();
+        });
+        indicators.appendChild(dot);
+      }
     }
 
     function updateIndicators() {
       if (!indicators) return;
       const dots = indicators.querySelectorAll("button");
+      const totalIndicators = Math.min(items.length, 5);
       dots.forEach((dot, i) => {
         const normalizedIndex = currentIndex % totalIndicators;
         if (i === normalizedIndex) {
@@ -172,47 +187,36 @@ const featuredProducts = await getFeaturedProducts();
       });
     }
 
-    function scrollToIndex(index: number) {
-      const width = getItemWidth();
-      currentIndex = Math.max(0, Math.min(index, items.length - 1));
-      scrollContainer.scrollTo({
-        left: currentIndex * width,
-        behavior: "smooth"
-      });
-      updateIndicators();
-    }
-
     function nextSlide() {
-      const width = getItemWidth();
-      const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-      if (scrollContainer.scrollLeft >= maxScroll - 10) {
-        scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
+      if (currentIndex >= items.length - 1) {
         currentIndex = 0;
       } else {
-        currentIndex = Math.min(currentIndex + 1, items.length - 1);
-        scrollContainer.scrollBy({ left: width, behavior: "smooth" });
+        currentIndex++;
       }
+      updatePosition();
       updateIndicators();
     }
 
     function prevSlide() {
-      const width = getItemWidth();
-      if (scrollContainer.scrollLeft <= 0) {
-        scrollContainer.scrollTo({ left: items.length * width, behavior: "smooth" });
+      if (currentIndex <= 0) {
         currentIndex = items.length - 1;
       } else {
-        currentIndex = Math.max(currentIndex - 1, 0);
-        scrollContainer.scrollBy({ left: -width, behavior: "smooth" });
+        currentIndex--;
       }
+      updatePosition();
       updateIndicators();
     }
+
+    // Inicializar
+    createIndicators();
+    updatePosition();
 
     // Auto-scroll cada 4 segundos
     autoScrollInterval = window.setInterval(nextSlide, 4000);
 
     // Botones de navegación
     scrollRight?.addEventListener("click", () => {
-      nextSlide();
+      prevSlide();
       resetAutoScroll();
     });
 
@@ -221,7 +225,7 @@ const featuredProducts = await getFeaturedProducts();
       resetAutoScroll();
     });
 
-    // Pausar auto-scroll al hover
+    // Pausar al hover
     scrollContainer.addEventListener("mouseenter", () => {
       clearInterval(autoScrollInterval);
     });
@@ -235,14 +239,34 @@ const featuredProducts = await getFeaturedProducts();
       autoScrollInterval = window.setInterval(nextSlide, 4000);
     }
 
-    // Detectar scroll manual
-    scrollContainer.addEventListener("scroll", () => {
-      const width = getItemWidth();
-      const newIndex = Math.round(scrollContainer.scrollLeft / width);
-      if (newIndex !== currentIndex) {
-        currentIndex = newIndex;
-        updateIndicators();
+    // Reconocer gestos swipe en mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    scrollContainer.addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      clearInterval(autoScrollInterval);
+    }, { passive: true });
+
+    scrollContainer.addEventListener("touchend", (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+      autoScrollInterval = window.setInterval(nextSlide, 4000);
+    }, { passive: true });
+
+    function handleSwipe() {
+      const diff = touchStartX - touchEndX;
+      const threshold = 50;
+      if (diff > threshold) {
+        prevSlide(); // swipe izquierda = siguiente
+      } else if (diff < -threshold) {
+        nextSlide(); // swipe derecha = anterior
       }
+    }
+
+    // Actualizar posición al redimensionar ventana
+    window.addEventListener("resize", () => {
+      updatePosition();
     });
   });
 </script>
