@@ -28,78 +28,61 @@ const cartItem = {
 <!--
   COMPONENTE: ProductCard (Vertical)
 
-  Tarjeta vertical para grid de productos
-  Muestra badge "Más Vendido" si está marcado como featured
-  Todas las tarjetas tienen la misma altura para consistencia visual
+  Tarjeta profesional con altura FIJA forzada
+  Todas las tarjetas lucen iguales
 -->
-<div
-  class="product-card bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
->
+<div class="product-card flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all duration-300">
   <a href={`/productos/${slug}`} class="block relative">
     <!-- Badge "Más Vendido" -->
     {
       product.featured && (
-        <div class="absolute top-2 left-2 z-10">
-          <span class="bg-gray-800 text-white text-xs font-bold px-3 py-1 rounded-md">
-            Más Vendido
+        <div class="absolute top-2 left-2 z-20">
+          <span class="bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-sm">
+            ★ Más Vendido
           </span>
         </div>
       )
     }
 
-    <!-- Imagen del producto (altura fija) -->
-    <div class="product-card-image aspect-square overflow-hidden bg-neutral-100">
+    <!-- Imagen - siempre misma altura -->
+    <div class="card-image w-full bg-gray-50 flex items-center justify-center overflow-hidden">
       <img
         src={imageUrl}
         alt={name}
-        class="w-full h-full object-contain p-4 hover:scale-105 transition-transform duration-300"
+        class="w-full h-full object-contain p-3 hover:scale-105 transition-transform duration-300"
         loading="lazy"
       />
     </div>
   </a>
 
-  <!-- Información del producto (altura fija) -->
-  <div class="product-card-info p-4 flex flex-col">
-    <a href={`/productos/${slug}`}>
-      <h3
-        class="text-neutral-800 font-semibold text-sm mb-1 line-clamp-2 hover:text-neutral-700 transition-colors"
-        style="min-height: 2.5rem;"
-      >
+  <!-- Info - altura fija forzada -->
+  <div class="card-info flex flex-col flex-1 p-3">
+    <!-- Título con máximo 2 líneas -->
+    <a href={`/productos/${slug}`} class="block">
+      <h3 class="text-gray-900 font-medium text-sm leading-tight line-clamp-2 hover:text-green-600 transition-colors">
         {name}
       </h3>
     </a>
 
-    <p class="text-neutral-500 text-xs mb-3 line-clamp-2" style="min-height: 1.5rem;">
-      {
-        description && description.length > 80
-          ? description.substring(0, 70) + "..."
-          : description || ""
-      }
-    </p>
+    <!-- Descripción ocultada para uniformidad -->
+    <!-- <p class="text-gray-400 text-xs mt-1 line-clamp-1">{description}</p> -->
 
-    <!-- Precios -->
-    <div class="flex items-center gap-2 mb-3">
-      <span class="text-neutral-900 font-bold text-lg">
-        $ {price.toLocaleString()}
-        {currency}
+    <!-- Precio al fondo -->
+    <div class="mt-auto pt-2">
+      <span class="text-gray-900 font-bold text-lg">
+        ${price.toLocaleString()}
+        <span class="text-xs font-normal text-gray-500 ml-1">{currency}</span>
       </span>
     </div>
 
-    <!-- Botón de añadir al carrito (React Island) - empujado al fondo -->
-    <div class="mt-auto">
+    <!-- Botón -->
+    <div class="pt-2">
       <AddToCartButton client:load product={cartItem} />
     </div>
   </div>
 </div>
 
 <style>
-  .line-clamp-1 {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -107,13 +90,32 @@ const cartItem = {
     overflow: hidden;
   }
 
-  /* Altura fija para la imagen */
-  .product-card-image {
-    height: 200px;
+  /* Imagen con altura FIJA - misma para todas */
+  .card-image {
+    height: 160px;
   }
 
-  /* Altura mínima fija para la info */
-  .product-card-info {
-    min-height: 160px;
+  /* Info con altura FIJA también */
+  .card-info {
+    min-height: 120px;
+  }
+
+  /* Hover en imagen */
+  .card-image img {
+    transition: transform 0.3s ease;
+  }
+  .card-image:hover img {
+    transform: scale(1.05);
+  }
+
+  /* Mobile: más pequeño */
+  @media (max-width: 640px) {
+    .card-image {
+      height: 120px;
+    }
+    .card-info {
+      min-height: 100px;
+      padding: 0.5rem;
+    }
   }
 </style>
