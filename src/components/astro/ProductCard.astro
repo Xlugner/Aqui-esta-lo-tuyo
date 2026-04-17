@@ -28,76 +28,61 @@ const cartItem = {
 <!--
   COMPONENTE: ProductCard (Vertical)
 
-  Tarjeta profesional limpia con:
-  - Imagen cuadrada consistente
-  - Título con línea de ajuste
-  - Precio claro
-  - Botón de añadir al carrito
-  - Badge "Más Vendido" profesional
+  Tarjeta profesional con altura FIJA forzada
+  Todas las tarjetas lucen iguales
 -->
-<div class="product-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-gray-200 transition-all duration-300 group">
+<div class="product-card flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all duration-300">
   <a href={`/productos/${slug}`} class="block relative">
     <!-- Badge "Más Vendido" -->
     {
       product.featured && (
-        <div class="absolute top-3 left-3 z-20">
-          <span class="bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
+        <div class="absolute top-2 left-2 z-20">
+          <span class="bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-sm">
             ★ Más Vendido
           </span>
         </div>
       )
     }
 
-    <!-- Imagen del producto -->
-    <div class="product-card-image bg-gray-50 relative">
+    <!-- Imagen - siempre misma altura -->
+    <div class="card-image w-full bg-gray-50 flex items-center justify-center overflow-hidden">
       <img
         src={imageUrl}
         alt={name}
-        class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+        class="w-full h-full object-contain p-3 hover:scale-105 transition-transform duration-300"
         loading="lazy"
       />
     </div>
   </a>
 
-  <!-- Información del producto -->
-  <div class="product-card-info p-4 flex flex-col bg-white">
+  <!-- Info - altura fija forzada -->
+  <div class="card-info flex flex-col flex-1 p-3">
+    <!-- Título con máximo 2 líneas -->
     <a href={`/productos/${slug}`} class="block">
-      <h3 class="text-gray-900 font-semibold text-sm leading-snug line-clamp-2 hover:text-green-600 transition-colors">
+      <h3 class="text-gray-900 font-medium text-sm leading-tight line-clamp-2 hover:text-green-600 transition-colors">
         {name}
       </h3>
     </a>
 
-    <p class="text-gray-400 text-xs mt-1 line-clamp-1">
-      {
-        description && description.length > 50
-          ? description.substring(0, 45) + "..."
-          : description || ""
-      }
-    </p>
+    <!-- Descripción ocultada para uniformidad -->
+    <!-- <p class="text-gray-400 text-xs mt-1 line-clamp-1">{description}</p> -->
 
-    <!-- Precio prominent -->
-    <div class="mt-3 mb-3">
-      <span class="text-gray-900 font-bold text-xl">
+    <!-- Precio al fondo -->
+    <div class="mt-auto pt-2">
+      <span class="text-gray-900 font-bold text-lg">
         ${price.toLocaleString()}
-        <span class="text-xs font-normal text-gray-500">{currency}</span>
+        <span class="text-xs font-normal text-gray-500 ml-1">{currency}</span>
       </span>
     </div>
 
-    <!-- Botón de añadir al carrito -->
-    <div class="mt-auto">
+    <!-- Botón -->
+    <div class="pt-2">
       <AddToCartButton client:load product={cartItem} />
     </div>
   </div>
 </div>
 
 <style>
-  .line-clamp-1 {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -105,32 +90,32 @@ const cartItem = {
     overflow: hidden;
   }
 
-  /* Imagen cuadrada consistente - responsive */
-  .product-card-image {
-    aspect-ratio: 1;
-    height: auto;
-    max-height: 220px;
+  /* Imagen con altura FIJA - misma para todas */
+  .card-image {
+    height: 160px;
   }
 
-  /* Info con mínimo para consistencia */
-  .product-card-info {
-    min-height: 140px;
+  /* Info con altura FIJA también */
+  .card-info {
+    min-height: 120px;
   }
 
-  /* Mobile-first: imagen más pequeña en móvil */
-  @media (max-width: 640px) {
-    .product-card-image {
-      max-height: 160px;
-    }
-    
-    .product-card-info {
-      min-height: 120px;
-      padding: 0.75rem;
-    }
+  /* Hover en imagen */
+  .card-image img {
+    transition: transform 0.3s ease;
   }
-
-  /* Hover suave */
-  .group:hover .product-card-image img {
+  .card-image:hover img {
     transform: scale(1.05);
+  }
+
+  /* Mobile: más pequeño */
+  @media (max-width: 640px) {
+    .card-image {
+      height: 120px;
+    }
+    .card-info {
+      min-height: 100px;
+      padding: 0.5rem;
+    }
   }
 </style>
