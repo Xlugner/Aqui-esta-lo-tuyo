@@ -9,13 +9,7 @@ export default defineConfig({
   adapter: cloudflare({
     imageService: 'cloudflare',
   }),
-  // Configuración especial para Cloudflare Pages
-  build: {
-    client: './dist/client',
-    server: './dist/_worker.js',
-  },
-  // Dominio de producción (para URLs canónicas)
-  site: process.env.SITE || 'https://aqui-esta-lo-tuyo.pages.dev',
+  site: process.env.SITE || 'https://aqui-esta-lo-tuyo.workers.dev',
   vite: {
     plugins: [tailwindcss()],
   },
