@@ -1,7 +1,7 @@
 import { a7 as defineMiddleware, ag as sequence } from './chunks/sequence_B6kYL9KL.mjs';
 import 'piccolore';
 import 'clsx';
-import { v as verifyAdminSession } from './chunks/admin-auth_HFCdXdjY.mjs';
+import { v as verifyAdminSession } from './chunks/admin-auth_BubtjmuE.mjs';
 
 const onRequest$1 = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;

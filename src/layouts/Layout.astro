@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import Footer from "../components/astro/Footer.astro";
 import Header from "../components/astro/Header.astro";
+import LoadingIndicator from "../components/astro/LoadingIndicator.astro";
 import { FloatingButtons } from "../components/react/FloatingButton";
 import { CartWrapper } from "../components/react/CartWrapper";
 import { getStoreConfig } from "../lib/supabase";
@@ -27,6 +28,9 @@ const storeName =
     <title>{title} | {storeName}</title>
   </head>
   <body class="bg-neutral-50 text-neutral-700">
+    <!-- Loading Indicator -->
+    <LoadingIndicator />
+
     <!-- Header -->
     <Header />
 
