@@ -8,12 +8,14 @@ export default defineConfig({
   output: 'server',
   adapter: cloudflare({
     imageService: 'cloudflare',
-    // Deshabilitar sesiones en local (funciona en Cloudflare)
-    mode: process.env.NODE_ENV === 'production' ? 'advanced' : 'directory',
   }),
+  // Configuración especial para Cloudflare Pages
+  build: {
+    client: './dist/client',
+    server: './dist/_worker.js',
+  },
   // Dominio de producción (para URLs canónicas)
   site: process.env.SITE || 'https://aqui-esta-lo-tuyo.pages.dev',
-  // Cloudflare no necesita las config de servidor específicas
   vite: {
     plugins: [tailwindcss()],
   },
