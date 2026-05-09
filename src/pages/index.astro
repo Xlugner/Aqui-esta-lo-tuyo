@@ -1,20 +1,70 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Hero from "../components/astro/HeroSection.astro";
-import FeaturedProducts from "../components/astro/FeaturedProducts.astro";
-import CallToAction from "../components/astro/CallToAction.astro"
+import FeaturedProducts from "../components/react/FeaturedProducts";
+import CallToAction from "../components/astro/CallToAction.astro";
+import { getFeaturedProducts } from "../lib/supabase";
+
+// Obtener productos destacados en el servidor
+const featuredProducts = await getFeaturedProducts();
 ---
 
 <Layout title="Inicio">
   <!-- Hero Section -->
-  <Hero>
-  </Hero> 
-  
+  <Hero />
+
+  <!-- Botón "Ver todos los productos" - MUY VISIBLE después del Hero -->
+  <section class="bg-neutral-100 py-4 px-4 border-y border-neutral-200">
+    <a
+      href="/productos"
+      class="flex items-center justify-center gap-3 max-w-lg mx-auto bg-gray-800 hover:bg-gray-700 active:scale-95 text-white font-bold text-lg py-4 px-6 rounded-xl shadow-md transition-all duration-200"
+    >
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+      </svg>
+      VER TODOS LOS PRODUCTOS
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
+    </a>
+  </section>
+
   <!-- Productos Destacados -->
-  <FeaturedProducts>
-  </FeaturedProducts>
-  
+  <section class="px-4 py-8 bg-neutral-50">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-neutral-800">
+          Productos Destacados
+        </h2>
+        <a
+          href="/productos"
+          class="text-gray-600 hover:text-gray-800 font-medium text-sm flex items-center gap-1 transition-colors"
+        >
+          Ver todos
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Isla React: grid de productos -->
+      <FeaturedProducts products={featuredProducts} client:load />
+    </div>
+  </section>
+
+  <!-- Segundo botón "Ver todos" al final -->
+  <div class="bg-neutral-50 pb-8 px-4">
+    <a
+      href="/productos"
+      class="flex items-center justify-center gap-3 max-w-lg mx-auto bg-gray-800 hover:bg-gray-700 active:scale-95 text-white font-bold text-lg py-4 px-6 rounded-xl shadow-md transition-all duration-200"
+    >
+      Ver todos los productos
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
+    </a>
+  </div>
+
   <!-- Call to Action -->
-  <CallToAction>
-  </CallToAction>
+  <CallToAction />
 </Layout>
